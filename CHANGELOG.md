@@ -12,6 +12,12 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- CI: `Validate CODEOWNERS` step in the `Lint` job. Calls
+  `gh api repos/${{ github.repository }}/codeowners/errors` and
+  fails the job if the returned `errors[]` array is non-empty.
+  No third-party action dependency. Closes #81 — addresses the
+  drift concern ADR-0010 flagged ("a malformed CODEOWNERS
+  silently disables code-owner-review enforcement").
 - `.github/ISSUE_TEMPLATE/plugin-submission.yml` — structured
   GitHub issue form for proposing a new plugin or guidebook.
   Captures repo URL, kind, pinned ref, category, author slug,

@@ -81,6 +81,25 @@ jobs:
       - name: Validate markdown frontmatter
         run: make validate-frontmatter
 
+      - name: Validate CODEOWNERS
+        env:
+          # gh api needs auth to read the codeowners/errors endpoint.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # A malformed CODEOWNERS silently disables code-owner-review
+          # enforcement (per ADR-0010). Surface errors at PR time so they
+          # don't accumulate. Returns errors[] in the response body; empty
+          # array means the file is valid.
+          errors_count=$(gh api "repos/${GITHUB_REPOSITORY}/codeowners/errors" \
+            --jq '.errors | length')
+          if [ "$errors_count" -gt 0 ]; then
+            echo "::error::CODEOWNERS has $errors_count errors:"
+            gh api "repos/${GITHUB_REPOSITORY}/codeowners/errors" \
+              --jq '.errors[] | "\(.path):\(.line // 0): \(.kind) — \(.message)"'
+            exit 1
+          fi
+          echo "CODEOWNERS is valid (0 errors)."
+
   changelog:
     name: Changelog
     if: github.event_name == 'pull_request'
