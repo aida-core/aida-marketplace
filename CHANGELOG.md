@@ -10,6 +10,18 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped Node from 20 to **22 LTS** across CI workflows (ci.yml,
+  check-updates.yml, release.yml), `package.json#engines`
+  (`>=22.0.0`), and `@types/node` (`^22.0.0`). Node 20 hits EOL
+  in April 2026; 22 is the current LTS.
+- CI: added `labeled`, `unlabeled` to ci.yml's `pull_request`
+  event types. Previously the changelog job's `skip-changelog`
+  label opt-out wouldn't re-evaluate on already-open PRs because
+  the workflow froze the event payload at trigger time. The
+  expanded type list makes label changes retrigger the workflow.
+
 ### Added
 
 - ADR-0014: Plugin Maturity Model. Local-first, fast (no network),
