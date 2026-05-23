@@ -137,9 +137,12 @@ export function formatMarkdown(report: MaturityReport): string {
   const lines: string[] = [];
 
   // SPDX header keeps generated reports REUSE-compliant when they're committed
-  // (e.g., docs/maturity/self-report.md). Harmless for ad-hoc stdout reports.
-  lines.push(`<!-- SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors -->`);
-  lines.push(`<!-- SPDX-License-Identifier: MPL-2.0 -->`);
+  // (e.g., docs/maturity/self-report.md). String fragments concatenated below
+  // so REUSE doesn't try to parse THIS source file's template literals as
+  // an inline SPDX header pointing at the maturity-engine's own license.
+  const spdx = "SPDX";
+  lines.push(`<!-- ${spdx}-FileCopyrightText: 2026 The AIDA Marketplace Authors -->`);
+  lines.push(`<!-- ${spdx}-License-Identifier: MPL-2.0 -->`);
   lines.push("");
   lines.push(`# Plugin Maturity Report`);
   lines.push("");

@@ -4,7 +4,7 @@
 # Plugin Maturity Report
 
 - **Path:** `/Users/dx-aida-core/Developer/aida-core/aida-marketplace`
-- **Scanned:** 2026-05-23T21:05:26.886Z
+- **Scanned:** 2026-05-23T21:06:27.734Z
 
 ## Overall: Level 3 — Hardened (80%)
 
