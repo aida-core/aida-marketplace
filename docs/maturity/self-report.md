@@ -1,7 +1,10 @@
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Plugin Maturity Report
 
 - **Path:** `/Users/dx-aida-core/Developer/aida-core/aida-marketplace`
-- **Scanned:** 2026-05-23T21:04:15.945Z
+- **Scanned:** 2026-05-23T21:05:26.886Z
 
 ## Overall: Level 3 — Hardened (80%)
 

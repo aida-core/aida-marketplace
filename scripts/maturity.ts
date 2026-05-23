@@ -136,6 +136,11 @@ export function formatMarkdown(report: MaturityReport): string {
   const pct = (n: number): string => `${(n * 100).toFixed(0)}%`;
   const lines: string[] = [];
 
+  // SPDX header keeps generated reports REUSE-compliant when they're committed
+  // (e.g., docs/maturity/self-report.md). Harmless for ad-hoc stdout reports.
+  lines.push(`<!-- SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors -->`);
+  lines.push(`<!-- SPDX-License-Identifier: MPL-2.0 -->`);
+  lines.push("");
   lines.push(`# Plugin Maturity Report`);
   lines.push("");
   lines.push(`- **Path:** \`${report.path}\``);
