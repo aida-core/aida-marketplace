@@ -7,7 +7,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { adr0003, adr0005, isValidGitHubSlug } from "./validate-marketplace.js";
+import { adr0003, adr0005, adr0006, isValidGitHubSlug } from "./validate-marketplace.js";
 import type { Marketplace, Plugin } from "./marketplace-types.js";
 
 function baseMarketplace(): Marketplace {
@@ -206,5 +206,92 @@ describe("ADR-0005 rule (slug identity, no email, no owner.url)", () => {
     );
     const findings = adr0005.check(m);
     assert.equal(findings.filter((f) => f.status === "FAIL").length, 0);
+  });
+});
+
+describe("ADR-0006 rule (semver-tag refs)", () => {
+  it("passes for a v-prefixed semver tag", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "v1.4.6" } }));
+    const findings = adr0006.check(m);
+    assert.equal(findings.filter((f) => f.status === "FAIL").length, 0);
+    assert.equal(findings.filter((f) => f.status === "OK").length, 1);
+  });
+
+  it("passes for a bare semver tag (no v prefix)", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "1.4.6" } }));
+    const findings = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(findings.length, 0);
+  });
+
+  it("fails on a branch name", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "main" } }));
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /not a semver tag/);
+  });
+
+  it("fails on a 40-char commit SHA", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        source: { source: "github", repo: "aida-core/example-plugin", ref: "a1b2c3d4e5f6789012345678901234567890abcd" },
+      }),
+    );
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+  });
+
+  it("fails on a non-semver tag", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "release-2024-01" } }));
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+  });
+
+  it("fails on a pre-release tag", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "v1.2.3-rc1" } }));
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /pre-release/);
+  });
+
+  it("fails on a build-metadata tag", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "v1.2.3+build.5" } }));
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+  });
+
+  it("fails on a two-segment version", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ source: { source: "github", repo: "aida-core/example-plugin", ref: "v1.2" } }));
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+  });
+
+  it("fails on a missing ref", () => {
+    const m = baseMarketplace();
+    const plugin = basePlugin();
+    (plugin.source as { ref?: unknown }).ref = undefined;
+    m.plugins.push(plugin);
+    const fails = adr0006.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /required/);
+  });
+
+  it("skips non-github sources", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        source: { source: "npm", repo: "some-pkg", ref: "1.0.0" } as Plugin["source"],
+      }),
+    );
+    const findings = adr0006.check(m);
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].status, "SKIP");
   });
 });

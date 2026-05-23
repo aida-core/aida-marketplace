@@ -12,6 +12,14 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0006: plugin `source.ref` values must be semver tags
+  (`v?\d+\.\d+\.\d+`). Branches, SHAs, non-semver tags, and
+  pre-release/build-metadata tags are all forbidden. Filed from #43.
+- Validator rule `[ADR-0006]` enforcing the above. Non-github
+  sources are skipped (rule applies only to github refs).
+- `SKIP` status on validator findings (in addition to `OK` / `FAIL`)
+  for rules that don't apply to a given entry. The reporter
+  surfaces the skipped-count in the summary line.
 - `scripts/validate-marketplace.ts` — the marketplace validator
   (per ADR-0001). Pluggable rule framework that emits per-finding
   `OK` / `FAIL` records with the originating ADR number in the
@@ -87,6 +95,12 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- `renovate.json` now overrides the org-wide
+  `minimumReleaseAge: "14 days"` to `0 days` for `aida-core/*`
+  source updates. We own those plugins; the 14-day supply-chain
+  gate exists to protect against compromised external dependencies,
+  not internal releases that already get full review at their own
+  repos. CI checks here still gate the auto-merge.
 - `.claude-plugin/marketplace.json` migrated to comply with ADR-0003
   and ADR-0005: added `kind: "plugin"` to the aida-core entry;
   changed the per-plugin `author` to `{ "name": "aida-core" }`

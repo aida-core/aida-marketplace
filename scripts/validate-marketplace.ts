@@ -24,7 +24,7 @@ import type { Marketplace, Plugin } from "./marketplace-types.js";
 
 // --- Types ---
 
-export type FindingStatus = "OK" | "FAIL";
+export type FindingStatus = "OK" | "FAIL" | "SKIP";
 
 export interface Finding {
   /** ADR identifier, e.g. "ADR-0003". */
@@ -216,26 +216,88 @@ export const adr0005: Rule = {
   },
 };
 
+// --- Rule: ADR-0006 (semver-tag refs) ---
+
+const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+$/;
+
+export const adr0006: Rule = {
+  id: "ADR-0006",
+  title: "Plugin source.ref must be a semver tag (v?X.Y.Z)",
+  check(marketplace) {
+    const findings: Finding[] = [];
+    marketplace.plugins.forEach((plugin, i) => {
+      const ctx = pluginContext(plugin, i);
+
+      // Rule scope: github sources only. Non-github sources are skipped.
+      if (plugin.source?.source !== "github") {
+        findings.push({
+          rule: "ADR-0006",
+          status: "SKIP",
+          context: ctx,
+          message: `source.source="${plugin.source?.source ?? "(missing)"}" — rule applies to github sources only`,
+        });
+        return;
+      }
+
+      const ref = plugin.source.ref;
+      if (typeof ref !== "string" || ref.length === 0) {
+        findings.push({
+          rule: "ADR-0006",
+          status: "FAIL",
+          context: ctx,
+          message: "`source.ref` is required and must be a non-empty string.",
+        });
+        return;
+      }
+
+      if (!SEMVER_TAG_RE.test(ref)) {
+        findings.push({
+          rule: "ADR-0006",
+          status: "FAIL",
+          context: ctx,
+          message:
+            `\`source.ref\` "${ref}" is not a semver tag. ` +
+            "Expected `v?\\d+\\.\\d+\\.\\d+`; branches, SHAs, non-semver tags, " +
+            "and pre-release tags are forbidden.",
+        });
+        return;
+      }
+
+      findings.push({
+        rule: "ADR-0006",
+        status: "OK",
+        context: ctx,
+        message: `source.ref "${ref}" is a valid semver tag`,
+      });
+    });
+    return findings;
+  },
+};
+
 // --- Registry ---
 
-export const RULES: readonly Rule[] = [adr0003, adr0005] as const;
+export const RULES: readonly Rule[] = [adr0003, adr0005, adr0006] as const;
 
 // --- Reporter ---
 
 function formatFinding(f: Finding): string {
-  const symbol = f.status === "OK" ? "✓" : "✗";
+  const symbol = f.status === "OK" ? "✓" : f.status === "FAIL" ? "✗" : "-";
   return `[${f.rule}] ${symbol} ${f.context}: ${f.message}`;
 }
 
 export function report(findings: readonly Finding[]): number {
   let failCount = 0;
   let okCount = 0;
+  let skipCount = 0;
 
   for (const f of findings) {
     const line = formatFinding(f);
     if (f.status === "FAIL") {
       failCount += 1;
       console.error(line);
+    } else if (f.status === "SKIP") {
+      skipCount += 1;
+      console.log(line);
     } else {
       okCount += 1;
       console.log(line);
@@ -243,7 +305,9 @@ export function report(findings: readonly Finding[]): number {
   }
 
   console.log("");
-  console.log(`Validator summary: ${okCount} passing, ${failCount} failing.`);
+  console.log(
+    `Validator summary: ${okCount} passing, ${failCount} failing, ${skipCount} skipped.`,
+  );
   if (failCount > 0) {
     console.error(
       "Failed checks cite ADR numbers. See docs/adr/<NNNN>-*.md for the rationale " +
