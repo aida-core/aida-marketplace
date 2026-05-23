@@ -3,13 +3,12 @@
   "version": "0.2.0",
   "description": "AIDA - Agentic Intelligence Digital Assistant. Foundation plugins for extending Claude Code.",
   "owner": {
-    "name": "oakensoul",
-    "email": "oakensoul@users.noreply.github.com",
-    "url": "https://github.com/oakensoul"
+    "name": "oakensoul"
   },
   "plugins": [
     {
       "name": "aida-core",
+      "kind": "plugin",
       "source": {
         "source": "github",
         "repo": "aida-core/aida-core-plugin",
@@ -20,8 +19,7 @@
       "category": "core",
       "homepage": "https://github.com/aida-core/aida-core-plugin",
       "author": {
-        "name": "oakensoul",
-        "email": "oakensoul@users.noreply.github.com"
+        "name": "aida-core"
       },
       "tags": [
         "core",

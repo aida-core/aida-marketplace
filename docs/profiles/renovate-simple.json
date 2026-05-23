@@ -1,0 +1,50 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits"
+  ],
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track plugin source.ref values in .claude-plugin/marketplace.json as github-releases",
+      "managerFilePatterns": ["^\\.claude-plugin/marketplace\\.json$"],
+      "matchStrings": [
+        "\"repo\":\\s*\"(?<depName>[^\"]+)\"[^}]*?\"ref\":\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Label trusted aida-core plugin sources",
+      "matchDepNames": ["/^aida-core\\//"],
+      "addLabels": ["trusted-source"]
+    },
+    {
+      "description": "Auto-merge minor/patch updates from trusted sources. Required CI checks (validator + tests) gate the merge.",
+      "matchDatasources": ["github-releases"],
+      "matchDepNames": ["/^aida-core\\//"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Gate external plugin sources on dashboard approval and label them for review",
+      "matchDatasources": ["github-releases"],
+      "matchDepNames": ["!/^aida-core\\//"],
+      "addLabels": ["external-source"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Major version bumps always require manual review",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major-version"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

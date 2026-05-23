@@ -12,6 +12,28 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `docs/adr/` directory adopting ADR-driven governance for the
+  marketplace (umbrella #42). Five Phase 1 ADRs accepted from the
+  /discuss issues filed in May:
+  - ADR-0001: validator implementation language → TypeScript (#57)
+  - ADR-0002: marketplace operator profiles → Simple / Enterprise
+    (#56); aida-marketplace adopts Simple
+  - ADR-0003: entry kinds → `plugin` / `guidebook` with dual
+    enforcement (schema field + matching repo suffix, validator
+    checks both agree) (#55)
+  - ADR-0004: GitHub App → profile-conditional (Simple is App-less,
+    Enterprise requires one) (#58)
+  - ADR-0005: author and owner identity → GitHub slugs everywhere,
+    no email, no owner.url; operator chooses personal vs org slug
+    for `owner.name` (#59)
+- `docs/profiles/renovate-simple.json` — reference Renovate config
+  for Simple-profile marketplaces. Auto-merges trusted-source
+  minor/patch updates behind CI; gates external sources and major
+  bumps on dashboard approval.
+- `docs/profiles/renovate-enterprise.json` — reference Renovate
+  config for Enterprise-profile marketplaces. Conservative defaults
+  (`automerge: false`) with dashboard approval for non-trusted
+  sources and major bumps.
 - `AUTHORS` file at the repo root listing substantive contributors.
   The collective copyright holder used in SPDX file headers is
   "The AIDA Marketplace Authors"; the AUTHORS roster is the
@@ -37,6 +59,12 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- `.claude-plugin/marketplace.json` migrated to comply with ADR-0003
+  and ADR-0005: added `kind: "plugin"` to the aida-core entry;
+  changed the per-plugin `author` to `{ "name": "aida-core" }`
+  (org slug, no email); slimmed top-level `owner` to
+  `{ "name": "oakensoul" }` (no email, no url — operator choice
+  to retain personal handle).
 - CI `lint` job now runs `make lint-yaml` / `make lint-md` /
   `make lint-json` / `make lint-reuse`. `reuse lint` is now a
   blocking gate for SPDX/REUSE compliance.
