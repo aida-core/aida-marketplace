@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "aida-marketplace adopts the Simple profile per ADR-0002. Extends the org-level Renovate config in aida-core/.github (default.json) and enables auto-merge for trusted-source minor/patch updates.",
+  "extends": [
+    "github>aida-core/.github"
+  ],
+  "packageRules": [
+    {
+      "description": "Auto-merge minor/patch updates from trusted aida-core/* sources. Required CI checks (validator + tests) gate the merge.",
+      "matchDatasources": ["github-releases"],
+      "matchDepNames": ["/^aida-core\\//"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ]
+}
