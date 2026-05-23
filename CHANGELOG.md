@@ -12,6 +12,14 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0007: closed allow-list for plugin categories
+  (`core`, `workflow`, `infrastructure`, `language`, `integration`,
+  `domain`, `productivity`, `security`, `observability`). Adding a
+  new category requires an ADR amendment + validator update in the
+  same PR. Filed from #45.
+- Validator rule `[ADR-0007]` enforcing the above. Failure
+  messages list the allowed set and point at the ADR amendment
+  process.
 - ADR-0006: plugin `source.ref` values must be semver tags
   (`v?\d+\.\d+\.\d+`). Branches, SHAs, non-semver tags, and
   pre-release/build-metadata tags are all forbidden. Filed from #43.

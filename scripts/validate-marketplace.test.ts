@@ -7,7 +7,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { adr0003, adr0005, adr0006, isValidGitHubSlug } from "./validate-marketplace.js";
+import { adr0003, adr0005, adr0006, adr0007, isValidGitHubSlug } from "./validate-marketplace.js";
 import type { Marketplace, Plugin } from "./marketplace-types.js";
 
 function baseMarketplace(): Marketplace {
@@ -293,5 +293,76 @@ describe("ADR-0006 rule (semver-tag refs)", () => {
     const findings = adr0006.check(m);
     assert.equal(findings.length, 1);
     assert.equal(findings[0].status, "SKIP");
+  });
+});
+
+describe("ADR-0007 rule (category allow-list)", () => {
+  const ALLOWED = [
+    "core",
+    "workflow",
+    "infrastructure",
+    "language",
+    "integration",
+    "domain",
+    "productivity",
+    "security",
+    "observability",
+  ];
+
+  it("passes for each allowed category", () => {
+    const m = baseMarketplace();
+    for (const cat of ALLOWED) {
+      m.plugins.push(basePlugin({ name: cat, category: cat }));
+    }
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 0);
+  });
+
+  it("fails on an ad-hoc category", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ category: "dev-workflow" }));
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /not in the allow-list/);
+  });
+
+  it("fails on a near-miss typo", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ category: "workflows" })); // plural — typo
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+  });
+
+  it("fails on empty string", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ category: "" }));
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /required/);
+  });
+
+  it("fails on missing category", () => {
+    const m = baseMarketplace();
+    const p = basePlugin();
+    (p as { category?: unknown }).category = undefined;
+    m.plugins.push(p);
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+  });
+
+  it("failure message lists the allow-list", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ category: "bogus" }));
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.match(fails[0].message, /core/);
+    assert.match(fails[0].message, /security/);
+    assert.match(fails[0].message, /observability/);
+  });
+
+  it("failure message points to the ADR amendment process", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin({ category: "bogus" }));
+    const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
+    assert.match(fails[0].message, /ADR amendment/);
   });
 });

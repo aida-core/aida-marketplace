@@ -274,9 +274,67 @@ export const adr0006: Rule = {
   },
 };
 
+// --- Rule: ADR-0007 (closed category allow-list) ---
+
+// The canonical list with rationale lives in docs/adr/0007-category-allow-list.md.
+// Amendments must update both this set and the ADR in the same PR.
+const ALLOWED_CATEGORIES: ReadonlySet<string> = new Set([
+  "core",
+  "workflow",
+  "infrastructure",
+  "language",
+  "integration",
+  "domain",
+  "productivity",
+  "security",
+  "observability",
+]);
+
+export const adr0007: Rule = {
+  id: "ADR-0007",
+  title: "Plugin category must be in the closed allow-list",
+  check(marketplace) {
+    const findings: Finding[] = [];
+    marketplace.plugins.forEach((plugin, i) => {
+      const ctx = pluginContext(plugin, i);
+
+      if (typeof plugin.category !== "string" || plugin.category.length === 0) {
+        findings.push({
+          rule: "ADR-0007",
+          status: "FAIL",
+          context: ctx,
+          message: "`category` is required and must be a non-empty string.",
+        });
+        return;
+      }
+
+      if (!ALLOWED_CATEGORIES.has(plugin.category)) {
+        const allowed = Array.from(ALLOWED_CATEGORIES).sort().join(", ");
+        findings.push({
+          rule: "ADR-0007",
+          status: "FAIL",
+          context: ctx,
+          message:
+            `category "${plugin.category}" is not in the allow-list. ` +
+            `Allowed: ${allowed}. Adding a new category requires an ADR amendment.`,
+        });
+        return;
+      }
+
+      findings.push({
+        rule: "ADR-0007",
+        status: "OK",
+        context: ctx,
+        message: `category "${plugin.category}" is in the allow-list`,
+      });
+    });
+    return findings;
+  },
+};
+
 // --- Registry ---
 
-export const RULES: readonly Rule[] = [adr0003, adr0005, adr0006] as const;
+export const RULES: readonly Rule[] = [adr0003, adr0005, adr0006, adr0007] as const;
 
 // --- Reporter ---
 
