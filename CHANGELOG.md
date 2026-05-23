@@ -12,6 +12,21 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `.github/workflows/labeler.yml` and `.github/labeler.yml` —
+  auto-label PRs by changed paths using `actions/labeler@v5`
+  (SHA-pinned). Categories: `plugin-change` (marketplace.json),
+  `adr` (docs/adr/), `schema` (schemas/), `documentation` (all-md
+  PRs), `ci` (workflows-only), `tooling` (scripts/deps-only).
+  The high-signal categories (plugin-change, adr, schema) trigger
+  on any matching file; the scope categories (documentation, ci,
+  tooling) trigger only when the entire PR is scoped to those
+  paths. Workflow uses `pull_request` (not
+  `pull_request_target`) to keep the write-scoped token from
+  ever being exposed to fork-checkout code. Filed from #51.
+- New labels: `plugin-change`, `ci`, `tooling`, `adr`, `schema`,
+  and `skip-changelog` (the last was already referenced by the
+  changelog job but hadn't been created — caught during the
+  labeler implementation review).
 - ADR-0009: listed plugins must ship
   `.claude-plugin/aida-config.json` at the pinned `source.ref`.
   The AIDA foundation plugin (`aida-core/aida-core-plugin`) is

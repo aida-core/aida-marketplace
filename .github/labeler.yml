@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+---
+# actions/labeler v5 config. Categories are applied based on the set of files
+# changed in a PR. Each category lists the globs that qualify.
+#
+# Match types:
+#   any-glob-to-any-file  — at least one file matches at least one glob
+#   all-globs-to-all-files — every changed file matches at least one glob (i.e. PR is
+#                            scoped entirely to these paths)
+#
+# `plugin-change`, `adr`, and `schema` are high-signal categories that apply when ANY
+# matching file is touched (even alongside other changes). `documentation`, `ci`, and
+# `tooling` are scope categories that apply only when the entire PR is scoped to those
+# paths — preventing a code-change PR that also touches docs from being mislabeled as
+# documentation-only.
+
+plugin-change:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".claude-plugin/marketplace.json"
+
+adr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/adr/**"
+
+schema:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "schemas/**"
+
+documentation:
+  - changed-files:
+      - all-globs-to-all-files:
+          - "docs/**"
+          - "**/*.md"
+          - "README*"
+          - "CHANGELOG*"
+          - "AUTHORS"
+          - "MAINTAINERS*"
+          - "LICENSE*"
+          - "LICENSES/**"
+
+ci:
+  - changed-files:
+      - all-globs-to-all-files:
+          - ".github/workflows/**"
+          - ".github/dependabot.yml"
+          - ".github/labeler.yml"
+          - "renovate.json"
+
+tooling:
+  - changed-files:
+      - all-globs-to-all-files:
+          - "scripts/**"
+          - "Makefile"
+          - "package.json"
+          - "package-lock.json"
+          - "requirements-dev.txt"
+          - "tsconfig.json"
+          - ".yamllint.yml"
+          - ".markdownlint.yml"
+          - ".markdownlintignore"
+          - "REUSE.toml"

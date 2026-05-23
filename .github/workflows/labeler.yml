@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+---
+name: Labeler
+
+# NOTE: `pull_request` (not `pull_request_target`) is deliberate. `pull_request_target`
+# runs in base-repo context with the write-scoped GITHUB_TOKEN exposed — safe today,
+# but a future contributor adding `actions/checkout` of the PR head would silently
+# expose the token to arbitrary fork code. Using `pull_request` removes that entire
+# class of mistake. The trade-off: fork PRs are labeled in the fork's context, which
+# is fine because this repo gates merges via CODEOWNERS. Switch only if a concrete
+# need to label fork PRs from the base context appears.
+on:
+  pull_request:
+
+# Least-privilege permissions. The labeler only needs to read paths and write labels.
+permissions:
+  contents: read
+  pull-requests: write
+
+# Cancel superseded runs when a PR is force-pushed or rapidly updated.
+concurrency:
+  group: labeler-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    name: Apply labels
+    runs-on: ubuntu-latest
+    steps:
+      # actions/labeler v5.0.0 — SHA-pinned per the Phase 3 hardening direction (#20).
+      # Renovate maintains the pin; the version comment is for human readability.
+      - uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
+        with:
+          # Sync only labels declared in `.github/labeler.yml`. Manually-applied
+          # labels not in that config (e.g. `good first issue`, `phase-*`) are
+          # untouched.
+          sync-labels: true
