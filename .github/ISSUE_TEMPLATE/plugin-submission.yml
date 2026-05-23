@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+---
+name: Plugin submission
+description: Propose a new plugin or guidebook for the marketplace catalog.
+title: "[plugin] <short-name>: one-line description"
+labels: ["plugin-change", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a new entry for the AIDA marketplace.
+
+        Please read [ADR-0003](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/0003-marketplace-entry-kinds.md)
+        (kind + repo suffix), [ADR-0005](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/0005-author-and-owner-identity.md)
+        (author identity), [ADR-0006](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/0006-semver-tag-refs.md)
+        (ref format), [ADR-0007](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/0007-category-allow-list.md)
+        (categories), and [ADR-0009](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/0009-aida-config-required.md)
+        (aida-config.json required) before submitting. The validator enforces these and will fail otherwise.
+
+  - type: input
+    id: repo
+    attributes:
+      label: Source repo (owner/name)
+      description: GitHub repo in `owner/name` form. Must end with `-plugin` or `-guidebook` per ADR-0003.
+      placeholder: "yourorg/your-thing-plugin"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      description: Per ADR-0003. Must match the repo suffix.
+      options:
+        - plugin
+        - guidebook
+    validations:
+      required: true
+
+  - type: input
+    id: ref
+    attributes:
+      label: Pinned ref (semver tag)
+      description: Per ADR-0006. Must match `v?\d+\.\d+\.\d+` — no branches, no SHAs, no pre-releases.
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Closed allow-list per ADR-0007.
+      options:
+        - core
+        - workflow
+        - infrastructure
+        - language
+        - integration
+        - domain
+        - productivity
+        - security
+        - observability
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Author (GitHub slug)
+      description: Per ADR-0005 — GitHub org or user slug. No email, no URL.
+      placeholder: "yourorg"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: One- or two-sentence factual summary that will appear in the manifest.
+      placeholder: "What does this plugin/guidebook do?"
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (comma-separated, kebab-case)
+      placeholder: "kebab-case, lower-case, comma-separated"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: conformance
+    attributes:
+      label: Conformance checklist
+      description: All items must be true at the pinned ref before this can be added.
+      options:
+        - label: The source repo's name ends with the matching suffix (`-plugin` or `-guidebook`).
+          required: true
+        - label: The source repo ships `.claude-plugin/aida-config.json` at the pinned ref (ADR-0009). N/A only for `aida-core/aida-core-plugin` (the foundation).
+          required: true
+        - label: I have read the relevant ADRs linked above and understand the marketplace's hard rules.
+          required: true

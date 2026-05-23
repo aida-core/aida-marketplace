@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+---
+name: ADR proposal
+description: Propose a new Architecture Decision Record for the marketplace.
+title: "[ADR] <one-line decision summary>"
+labels: ["adr", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an ADR. ADRs record durable architectural decisions for the marketplace.
+
+        Read the [ADR index](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/README.md)
+        and the [template](https://github.com/aida-core/aida-marketplace/blob/main/docs/adr/0000-adr-template.md)
+        before filling this out. Per [#42](https://github.com/aida-core/aida-marketplace/issues/42),
+        new ADRs that establish manifest constraints also need a matching validator rule
+        — they land together in the same PR.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What's the problem? What forces are at play? Why is a decision needed now?
+      placeholder: |
+        State the situation, not the solution. Cite concrete examples or pain points.
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: Considered options
+      description: List the alternatives with honest pros/cons. Don't strawman the rejected options.
+      placeholder: |
+        1. Option A — one-sentence description.
+           - Pros: ...
+           - Cons: ...
+        2. Option B — ...
+        3. Option C — ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Proposed decision
+      description: One sentence stating the choice, then why this option over the others.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: enforcement
+    attributes:
+      label: Enforcement mechanism
+      description: How will this decision be mechanically enforced (per the umbrella #42 governance pattern)?
+      options:
+        - Validator rule (in scripts/validate-marketplace.ts; tagged [ADR-NNNN])
+        - JSON Schema constraint (in schemas/marketplace.schema.json)
+        - CI workflow check (new workflow or step)
+        - GitHub-enforced (branch protection, CODEOWNERS, etc.)
+        - Documentation only (no mechanical enforcement)
+        - Other / unsure (explain below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Expected consequences
+      description: What changes if we adopt this? Both gains and accepted costs.
+      placeholder: |
+        Gained:
+        - ...
+        Accepted costs:
+        - ...
+
+  - type: input
+    id: related
+    attributes:
+      label: Related ADRs / issues
+      description: Comma-separated list of ADR numbers or issue references this interacts with.
+      placeholder: "ADR-0003, ADR-0007, #45"
+
+  - type: checkboxes
+    id: confirms
+    attributes:
+      label: Submission checklist
+      options:
+        - label: I've read the existing ADRs to confirm this isn't already decided or contradicted.
+          required: true
+        - label: I understand that "rule = ADR + check in same PR" — if this proposal becomes a validator rule, the PR landing it will also update the validator and tests.
+          required: true

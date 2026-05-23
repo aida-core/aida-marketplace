@@ -12,6 +12,21 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `.github/ISSUE_TEMPLATE/plugin-submission.yml` — structured
+  GitHub issue form for proposing a new plugin or guidebook.
+  Captures repo URL, kind, pinned ref, category, author slug,
+  description, tags, and a conformance checklist tied to the
+  relevant ADRs (0003, 0005, 0006, 0007, 0009). Auto-applies
+  `plugin-change` + `needs-triage` labels. Filed from #79.
+- `.github/ISSUE_TEMPLATE/adr-proposal.yml` — structured ADR
+  proposal form mirroring `docs/adr/0000-adr-template.md`:
+  context, considered options, proposed decision, enforcement
+  mechanism (dropdown matching the available enforcement
+  surfaces), consequences, related ADRs. Auto-applies `adr` +
+  `needs-triage` labels. Filed from #79.
+- Both templates complement the org-level `bug_report.yml` and
+  `feature_request.yml` in `aida-core/.github/ISSUE_TEMPLATE/`
+  rather than replacing them.
 - `CLAUDE.md` at the repo root — Claude Code project memory.
   Identity, repo layout, hard rules summarized from accepted
   ADRs 0001–0010, command reference, and a `knowledge/` map
