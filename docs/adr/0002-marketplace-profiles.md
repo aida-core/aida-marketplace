@@ -15,7 +15,10 @@ AIDA marketplaces vary widely in scope and constraints:
 - Others are private or internal, listing private plugins, with stricter review or compliance requirements.
 - Some are happy to run on hosted services; others have policy requirements to own the entire auth chain.
 
-A single recommended setup can't cover both ends well. Pushing complexity onto a hobby/community operator is wasteful; pushing under-engineered defaults onto a regulated operator is unsafe. Different ADRs (update mechanism, GitHub App, secret management) all bottom out at the same dimension: what kind of marketplace is this?
+A single recommended setup can't cover both ends well. Pushing complexity onto a
+hobby/community operator is wasteful; pushing under-engineered defaults onto a regulated
+operator is unsafe. Different ADRs (update mechanism, GitHub App, secret management) all
+bottom out at the same dimension: what kind of marketplace is this?
 
 This ADR defines two named operator profiles. Future ADRs and reference configs slot into one or the other.
 

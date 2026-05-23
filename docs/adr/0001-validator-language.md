@@ -9,7 +9,11 @@
 
 ## Context
 
-The marketplace needs a validator that enforces per-rule constraints on `marketplace.json` and listed-plugin metadata (see [#42](https://github.com/aida-core/aida-marketplace/issues/42)). Today, validation lives in TypeScript inside `scripts/update-marketplace.ts --check`. A downstream marketplace (Splash-AI) implements the same checks as `scripts/validate-marketplace.sh` calling Python heredocs.
+The marketplace needs a validator that enforces per-rule constraints on `marketplace.json` and
+listed-plugin metadata (see [#42](https://github.com/aida-core/aida-marketplace/issues/42)).
+Today, validation lives in TypeScript inside `scripts/update-marketplace.ts --check`. A
+downstream private marketplace implements the same checks as `scripts/validate-marketplace.sh`
+calling Python heredocs.
 
 We need to decide on a canonical implementation language so that:
 

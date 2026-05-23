@@ -71,7 +71,13 @@ Example:
 
 ### Why "guidebook"
 
-The original `#55` framing used "playbook," but playbook carries sports/military genre baggage. "Guidebook" captures the same mental model — *a curated work that progressively walks you through a domain* — with no domain-specific flavor. A guidebook isn't a single document; it's a unified work that contains multiple sections/experts inside (travel guidebook → city guide + food guide + transit guide; contests guidebook → onboarding agent + rules agent + scoring agent). That matches the actual content shape: a bundle of agents with progressively disclosed knowledge.
+The original `#55` framing used "playbook," but playbook carries sports/military genre
+baggage. "Guidebook" captures the same mental model — *a curated work that progressively
+walks you through a domain* — with no domain-specific flavor. A guidebook isn't a single
+document; it's a unified work that contains multiple sections/experts inside (travel
+guidebook → city guide + food guide + transit guide; contests guidebook → onboarding agent +
+rules agent + scoring agent). That matches the actual content shape: a bundle of agents with
+progressively disclosed knowledge.
 
 ### Why dual enforcement over either alone
 

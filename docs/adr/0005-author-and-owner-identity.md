@@ -103,12 +103,14 @@ Adopt **option 2: GitHub slug** for both `owner.name` and `plugins[].author.name
 Validator rule `[ADR-0005]` (per [ADR-0001](./0001-validator-language.md)):
 
 **Top-level `owner`:**
+
 - `owner.name` is present.
 - `owner.name` matches GitHub's slug pattern.
 - `owner.email` MUST NOT be present.
 - `owner.url` MUST NOT be present.
 
 **Per-entry `plugins[].author`:**
+
 - `author.name` is present.
 - `author.name` matches GitHub's slug pattern.
 - `author.email` MUST NOT be present.

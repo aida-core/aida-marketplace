@@ -38,7 +38,11 @@ Under [ADR-0002](./0002-marketplace-profiles.md) (operator profiles), this decis
 Adopt **option 2**: profile-conditional.
 
 - **Simple profile** (including `aida-marketplace` today): no GitHub App. Mend-hosted Renovate handles auth. Workflows use the default `GITHUB_TOKEN`. This is sufficient for all-public listings.
-- **Enterprise profile**: a GitHub App is required. At minimum it needs `Contents: Read` on the plugin repos being tracked, plus `Pull requests: Write` and `Issues: Write` on the marketplace repo itself. Reference docs and example workflow snippets live in [`docs/profiles/enterprise-github-app.md`](../profiles/enterprise-github-app.md) (to be written under the implementation issue).
+- **Enterprise profile**: a GitHub App is required. At minimum it needs `Contents: Read` on
+  the plugin repos being tracked, plus `Pull requests: Write` and `Issues: Write` on the
+  marketplace repo itself. Reference docs and example workflow snippets live in
+  [`docs/profiles/enterprise-github-app.md`](../profiles/enterprise-github-app.md) (to be
+  written under the implementation issue).
 
 ### Triggers to migrate `aida-marketplace` from Simple → Enterprise
 
