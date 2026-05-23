@@ -12,6 +12,16 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `repository_dispatch` trigger on `.github/workflows/check-updates.yml`
+  for event type `plugin-released`. Lets plugin repos optionally send
+  an instant-bump signal that bypasses Renovate's Monday cadence by
+  triggering an immediate update-check PR. Marketplace-side handler
+  reuses the existing PR-creation logic from the scheduled path
+  (existing-PR dedup, stale-branch pruning). Closes #83.
+- `docs/runbooks/instant-bump.md` — plugin-side workflow snippet,
+  required `MARKETPLACE_DISPATCH_TOKEN` secret, verification steps,
+  and the "when to enable / when not to" framing. The dispatch path
+  remains opt-in; Renovate's polling cadence is still the default.
 - ADR-0012: supply-chain audit policy. Adds a blocking `Audit`
   CI job running `npm audit --audit-level=high --omit=optional`
   on every PR and push to `main`. Pairs with the existing
