@@ -12,6 +12,31 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0014: Plugin Maturity Model. Local-first, fast (no network),
+  scores plugin repos across 4 dimensions (Compliance, Security,
+  DevOps, Quality) with 6 checks each = 24 checks total. Scoring
+  formula `(present + 0.5*partial) / (present + partial + missing)`
+  maps to 4 levels (Foundation / Governed / Hardened / Exemplary).
+  Closes #21.
+- `scripts/maturity-checks.ts` — 24 pure check functions, one per
+  inventoried item (LICENSE, gitignore secrets, audit in CI,
+  CODEOWNERS, task runner, etc.). Each returns
+  `present`/`partial`/`missing`/`n/a` with one-line evidence.
+- `scripts/maturity.ts` — CLI + scoring engine + JSON/Markdown
+  formatters. Supports `--format json|markdown` and
+  `--fail-under <level>` for opt-in CI gating.
+- `scripts/maturity.test.ts` — 30+ unit tests including the
+  level-threshold boundary tests (0.49 → L1, 0.5 → L2, 0.69 → L2,
+  0.7 → L3, 0.89 → L3, 0.9 → L4) and an integration test that
+  guards the marketplace's own maturity from regressing below
+  Level 3.
+- `docs/maturity/README.md` — usage docs + check inventory walkthrough.
+- `docs/maturity/self-report.md` — committed snapshot of the
+  marketplace's own maturity at merge time (currently Level 3 —
+  Hardened, 80%; Compliance reads low because the local scanner
+  doesn't yet detect org-level fallback files — deferred enhancement).
+- `make maturity` and `make maturity-report` targets;
+  `npm run maturity` script.
 - ADR-0013: marketplace release model. Manual semver tag at
   maintainer discretion, asserting `marketplace.json#version`
   matches the tag. Bump policy: patch = plugin patch/minor only;

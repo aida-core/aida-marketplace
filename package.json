@@ -10,6 +10,7 @@
     "check": "tsx scripts/update-marketplace.ts",
     "update": "tsx scripts/update-marketplace.ts --update",
     "validate": "tsx scripts/validate-marketplace.ts",
+    "maturity": "tsx scripts/maturity.ts",
     "test": "tsx --test scripts/*.test.ts",
     "typecheck": "tsc --noEmit"
   },

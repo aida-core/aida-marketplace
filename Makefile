@@ -4,7 +4,7 @@
 # AIDA Marketplace Makefile
 # Run `make help` for available targets
 
-.PHONY: help install clean-venv lint lint-yaml lint-md lint-json lint-reuse typecheck check validate validate-frontmatter link-check test
+.PHONY: help install clean-venv lint lint-yaml lint-md lint-json lint-reuse typecheck check validate validate-frontmatter link-check maturity maturity-report test
 
 # --- Python venv resolution -------------------------------------------------
 #
@@ -72,6 +72,12 @@ validate: ## Run marketplace.json rule validation (per ADR-0001)
 
 validate-frontmatter: ## Validate YAML frontmatter on markdown files
 	$(PY) scripts/validate-frontmatter.py
+
+maturity: ## Run the Plugin Maturity Model against this repo (JSON output)
+	npm run maturity
+
+maturity-report: ## Regenerate docs/maturity/self-report.md
+	npx tsx scripts/maturity.ts . --format markdown > docs/maturity/self-report.md
 
 link-check: ## Validate markdown links via lychee (install: brew install lychee, or cargo install lychee)
 	@command -v lychee >/dev/null 2>&1 || { echo "ERROR: lychee not installed. brew install lychee  OR  cargo install lychee" >&2; exit 1; }
