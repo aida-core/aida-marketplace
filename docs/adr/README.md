@@ -39,3 +39,4 @@ See [`0000-adr-template.md`](./0000-adr-template.md). Copy it, rename, fill in.
 | 0006 | [Plugin source refs must be semver tags](./0006-semver-tag-refs.md) | Accepted | [#43](https://github.com/aida-core/aida-marketplace/issues/43) |
 | 0007 | [Closed allow-list for plugin categories](./0007-category-allow-list.md) | Accepted | [#45](https://github.com/aida-core/aida-marketplace/issues/45) |
 | 0008 | [JSON Schema as the canonical structural definition](./0008-json-schemas.md) | Accepted | [#50](https://github.com/aida-core/aida-marketplace/issues/50) |
+| 0009 | [Listed plugins must ship `.claude-plugin/aida-config.json`](./0009-aida-config-required.md) | Accepted | [#44](https://github.com/aida-core/aida-marketplace/issues/44) |

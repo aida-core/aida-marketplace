@@ -12,6 +12,20 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0009: listed plugins must ship
+  `.claude-plugin/aida-config.json` at the pinned `source.ref`.
+  The AIDA foundation plugin (`aida-core/aida-core-plugin`) is
+  exempt — the marketplace's existence is predicated on it being
+  the foundation, so requiring self-conformance would be
+  circular. Filed from #44.
+- Validator rule `[ADR-0009]` enforcing the above. Uses a
+  `RemoteFileChecker` interface (with `gh api` as the default
+  implementation) so tests can run against a mock without
+  network access. SKIPs cleanly when `gh` is unavailable on
+  dev machines.
+- 8 new unit tests covering ADR-0009: foundation exemption,
+  non-github skip, present/missing/error file outcomes, missing
+  ref, and a multi-plugin mixed-outcome scenario.
 - `scripts/validate-frontmatter.py` — validates YAML frontmatter
   on markdown files against the AIDA frontmatter schema. The
   schema is fetched from its canonical upstream location at
@@ -138,6 +152,9 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- CI: the `Validate marketplace.json` step now receives
+  `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` so ADR-0009 can hit
+  the Contents API for each listed plugin.
 - `renovate.json` now overrides the org-wide
   `minimumReleaseAge: "14 days"` to `0 days` for `aida-core/*`
   source updates. We own those plugins; the 14-day supply-chain
