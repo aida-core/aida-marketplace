@@ -14,6 +14,42 @@ dist/
 .env
 .env.*
 
+# Secrets / credentials (defense-in-depth — never commit these by accident)
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.jks
+*.keystore
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+id_ecdsa
+id_ecdsa.*
+id_dsa
+id_dsa.*
+credentials
+credentials.*
+secrets.yaml
+secrets.yml
+*.gpg
+*.asc
+.netrc
+.npmrc
+.pypirc
+
+# Cloud / infra credentials
+kubeconfig
+*.kubeconfig
+.kube/config
+.aws/credentials
+.aws/config
+*.tfstate
+*.tfstate.backup
+.terraform/
+
 # IDE
 .vscode/
 .idea/
