@@ -12,6 +12,34 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `CLAUDE.md` at the repo root — Claude Code project memory.
+  Identity, repo layout, hard rules summarized from accepted
+  ADRs 0001–0010, command reference, and a `knowledge/` map
+  that names each file so Claude can `Read` it on demand.
+  Carries YAML frontmatter (`type: documentation`) for AIDA
+  tooling compliance, but the frontmatter is metadata for
+  AIDA validators — not what Claude Code keys on for loading.
+  Filed from #47.
+- `knowledge/` directory with progressive-disclosure reference
+  material for contributors and Claude Code:
+  - `index.md` — catalog + audience-mode guidance (human /
+    Claude / new-knowledge-author)
+  - `workflows.md` — concrete contributor recipes (add a
+    plugin, bump a version, rebuild the manifest, add a
+    validator rule, amend the category allow-list, add an
+    ADR, apply branch protection, investigate version drift,
+    respond to link-check failures)
+  - `tooling.md` — inventory of every tool starting with the
+    `.claude-plugin/` layout: schemas, validators, CI
+    workflows, Renovate setup, REUSE tooling, Makefile
+  - `troubleshooting.md` — common CI failures and fixes
+    (REUSE, frontmatter, lychee, validator rules, signed
+    commits, no-AI-coauthor, Renovate didn't run)
+- Pattern is intended to be copied by downstream marketplaces
+  scaffolded from this repo. The companion ADR index at
+  `docs/adr/README.md` and operational runbooks in
+  `docs/runbooks/` are linked from the new files; not
+  duplicated.
 - ADR-0010: branch protection baseline. Profile-conditional
   (Simple vs Enterprise per ADR-0002) with full security control
   set on both — `required_signatures` (signed commits),
