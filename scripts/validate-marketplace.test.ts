@@ -16,7 +16,10 @@ import {
   adr0006,
   adr0007,
   isValidGitHubSlug,
+  makeAdr0009Rule,
   validateSchema,
+  type FileCheckResult,
+  type RemoteFileChecker,
 } from "./validate-marketplace.js";
 import type { Marketplace, Plugin } from "./marketplace-types.js";
 
@@ -489,5 +492,174 @@ describe("Schema validation (ADR-0008)", () => {
     assert.equal(result.valid, false);
     const categoryErr = result.errors.find((e) => /category/.test(e.instancePath ?? ""));
     assert.ok(categoryErr, "expected an error with instancePath containing /category");
+  });
+});
+
+describe("ADR-0009 rule (aida-config.json existence)", () => {
+  function makeMockChecker(opts: {
+    available?: boolean;
+    files?: Record<string, FileCheckResult>;
+  }): RemoteFileChecker {
+    return {
+      isAvailable: () => opts.available ?? true,
+      checkFile: (repo, ref, path): FileCheckResult => {
+        const key = `${repo}@${ref}:${path}`;
+        return opts.files?.[key] ?? "missing";
+      },
+    };
+  }
+
+  it("emits a single SKIP when the checker is unavailable", () => {
+    const m = baseMarketplace();
+    m.plugins.push(basePlugin());
+    m.plugins.push(basePlugin({ name: "b" }));
+    const rule = makeAdr0009Rule(makeMockChecker({ available: false }));
+    const findings = rule.check(m);
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].status, "SKIP");
+    assert.match(findings[0].message, /unavailable/);
+  });
+
+  it("exempts the AIDA foundation plugin", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        name: "aida-core",
+        source: { source: "github", repo: "aida-core/aida-core-plugin", ref: "v1.4.6" },
+      }),
+    );
+    const rule = makeAdr0009Rule(makeMockChecker({ available: true, files: {} }));
+    const findings = rule.check(m);
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].status, "SKIP");
+    assert.match(findings[0].message, /foundation/);
+  });
+
+  it("skips non-github sources", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        source: { source: "npm", repo: "some-pkg", ref: "1.0.0" } as Plugin["source"],
+      }),
+    );
+    const rule = makeAdr0009Rule(makeMockChecker({ available: true, files: {} }));
+    const findings = rule.check(m);
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].status, "SKIP");
+  });
+
+  it("passes when aida-config.json is present", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        name: "pulumi",
+        source: { source: "github", repo: "aida-core/aida-pulumi-plugin", ref: "v0.9.0" },
+      }),
+    );
+    const rule = makeAdr0009Rule(
+      makeMockChecker({
+        available: true,
+        files: {
+          "aida-core/aida-pulumi-plugin@v0.9.0:.claude-plugin/aida-config.json": "present",
+        },
+      }),
+    );
+    const findings = rule.check(m);
+    const fails = findings.filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 0);
+    assert.equal(findings.filter((f) => f.status === "OK").length, 1);
+  });
+
+  it("fails when aida-config.json is missing (404)", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        name: "flow",
+        source: { source: "github", repo: "aida-core/aida-flow-plugin", ref: "v0.1.0" },
+      }),
+    );
+    const rule = makeAdr0009Rule(
+      makeMockChecker({
+        available: true,
+        files: {
+          "aida-core/aida-flow-plugin@v0.1.0:.claude-plugin/aida-config.json": "missing",
+        },
+      }),
+    );
+    const fails = rule.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /HTTP 404/);
+  });
+
+  it("fails on a network/checker error (could not verify)", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        name: "flow",
+        source: { source: "github", repo: "aida-core/aida-flow-plugin", ref: "v0.1.0" },
+      }),
+    );
+    const rule = makeAdr0009Rule(
+      makeMockChecker({
+        available: true,
+        files: {
+          "aida-core/aida-flow-plugin@v0.1.0:.claude-plugin/aida-config.json": "error",
+        },
+      }),
+    );
+    const fails = rule.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /could not verify/);
+  });
+
+  it("fails when source.ref is missing", () => {
+    const m = baseMarketplace();
+    const plugin = basePlugin({
+      source: { source: "github", repo: "aida-core/x-plugin", ref: "v1.0.0" },
+    });
+    (plugin.source as { ref?: unknown }).ref = undefined;
+    m.plugins.push(plugin);
+    const rule = makeAdr0009Rule(makeMockChecker({ available: true }));
+    const fails = rule.check(m).filter((f) => f.status === "FAIL");
+    assert.equal(fails.length, 1);
+    assert.match(fails[0].message, /source.ref/);
+  });
+
+  it("handles a multi-plugin manifest with mixed outcomes", () => {
+    const m = baseMarketplace();
+    m.plugins.push(
+      basePlugin({
+        name: "core",
+        source: { source: "github", repo: "aida-core/aida-core-plugin", ref: "v1.4.6" },
+      }),
+    );
+    m.plugins.push(
+      basePlugin({
+        name: "pulumi",
+        source: { source: "github", repo: "aida-core/aida-pulumi-plugin", ref: "v0.9.0" },
+      }),
+    );
+    m.plugins.push(
+      basePlugin({
+        name: "flow",
+        source: { source: "github", repo: "aida-core/aida-flow-plugin", ref: "v0.1.0" },
+      }),
+    );
+    const rule = makeAdr0009Rule(
+      makeMockChecker({
+        available: true,
+        files: {
+          "aida-core/aida-pulumi-plugin@v0.9.0:.claude-plugin/aida-config.json": "present",
+          "aida-core/aida-flow-plugin@v0.1.0:.claude-plugin/aida-config.json": "missing",
+        },
+      }),
+    );
+    const findings = rule.check(m);
+    const skips = findings.filter((f) => f.status === "SKIP");
+    const oks = findings.filter((f) => f.status === "OK");
+    const fails = findings.filter((f) => f.status === "FAIL");
+    assert.equal(skips.length, 1, "foundation is skipped");
+    assert.equal(oks.length, 1, "pulumi has file → OK");
+    assert.equal(fails.length, 1, "flow missing → FAIL");
   });
 });

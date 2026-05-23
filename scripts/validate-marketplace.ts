@@ -16,6 +16,7 @@
 // Each rule's failure messages MUST cite the ADR by id (e.g. `[ADR-0003]`)
 // so contributors can find the rationale without leaving the terminal.
 
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -276,6 +277,56 @@ export const adr0006: Rule = {
   },
 };
 
+// --- Remote file checker (used by ADR-0009) ---
+
+export type FileCheckResult = "present" | "missing" | "error";
+
+export interface RemoteFileChecker {
+  /** Returns true if the checker is ready to make calls (gh auth, network, etc.). */
+  isAvailable(): boolean;
+  /** Check whether a file exists at the given ref in the given GitHub repo. */
+  checkFile(repo: string, ref: string, path: string): FileCheckResult;
+}
+
+/**
+ * Default checker that shells out to `gh api`. Requires `gh` CLI on PATH and
+ * a valid authentication (CI: GITHUB_TOKEN; local: `gh auth login`).
+ */
+export const ghCliChecker: RemoteFileChecker = {
+  isAvailable(): boolean {
+    try {
+      execFileSync("gh", ["auth", "status"], {
+        stdio: ["pipe", "pipe", "pipe"],
+        timeout: 10_000,
+        encoding: "utf-8",
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  checkFile(repo, ref, path): FileCheckResult {
+    const url = `repos/${repo}/contents/${path}?ref=${encodeURIComponent(ref)}`;
+    try {
+      execFileSync("gh", ["api", url], {
+        stdio: ["pipe", "pipe", "pipe"],
+        timeout: 30_000,
+        encoding: "utf-8",
+      });
+      return "present";
+    } catch (err) {
+      const stderr = (err as { stderr?: Buffer | string }).stderr ?? "";
+      const stderrStr = typeof stderr === "string" ? stderr : stderr.toString();
+      // `gh api` writes the API response to stderr on non-2xx; a 404 includes "HTTP 404"
+      // or '"status":"404"' in the body. Treat both as a clean "missing".
+      if (/HTTP 404\b/.test(stderrStr) || /"status":\s*"404"/.test(stderrStr) || /Not Found/i.test(stderrStr)) {
+        return "missing";
+      }
+      return "error";
+    }
+  },
+};
+
 // --- Rule: ADR-0007 (closed category allow-list) ---
 
 // The canonical list with rationale lives in docs/adr/0007-category-allow-list.md.
@@ -334,9 +385,114 @@ export const adr0007: Rule = {
   },
 };
 
+// --- Rule: ADR-0009 (aida-config.json existence) ---
+
+// The AIDA foundation plugin. Exempt from ADR-0009 because the marketplace's
+// existence is predicated on it being the foundation — requiring it to declare
+// conformance to itself would be circular.
+const FOUNDATION_REPO = "aida-core/aida-core-plugin";
+const AIDA_CONFIG_PATH = ".claude-plugin/aida-config.json";
+
+export function makeAdr0009Rule(checker: RemoteFileChecker): Rule {
+  return {
+    id: "ADR-0009",
+    title: "Listed plugins must ship .claude-plugin/aida-config.json",
+    check(marketplace) {
+      const findings: Finding[] = [];
+
+      // Gate: checker must be available. Without it (e.g., dev machine without
+      // `gh auth login`) we emit a single SKIP notice rather than false-FAIL
+      // every plugin.
+      if (!checker.isAvailable()) {
+        findings.push({
+          rule: "ADR-0009",
+          status: "SKIP",
+          context: "(all plugins)",
+          message:
+            "remote file checker unavailable (e.g., `gh` CLI not installed or " +
+            "not authenticated); install gh and run `gh auth login` to enable " +
+            "ADR-0009 verification.",
+        });
+        return findings;
+      }
+
+      marketplace.plugins.forEach((plugin, i) => {
+        const ctx = pluginContext(plugin, i);
+
+        if (plugin.source?.source !== "github") {
+          findings.push({
+            rule: "ADR-0009",
+            status: "SKIP",
+            context: ctx,
+            message: `source.source="${plugin.source?.source ?? "(missing)"}" — rule applies to github sources only`,
+          });
+          return;
+        }
+
+        if (plugin.source.repo === FOUNDATION_REPO) {
+          findings.push({
+            rule: "ADR-0009",
+            status: "SKIP",
+            context: ctx,
+            message: `${FOUNDATION_REPO} is the AIDA foundation; exempt from ADR-0009`,
+          });
+          return;
+        }
+
+        const ref = plugin.source.ref;
+        if (typeof ref !== "string" || ref.length === 0) {
+          findings.push({
+            rule: "ADR-0009",
+            status: "FAIL",
+            context: ctx,
+            message: "cannot verify aida-config.json: source.ref is missing.",
+          });
+          return;
+        }
+
+        const result = checker.checkFile(plugin.source.repo, ref, AIDA_CONFIG_PATH);
+        if (result === "present") {
+          findings.push({
+            rule: "ADR-0009",
+            status: "OK",
+            context: ctx,
+            message: `${AIDA_CONFIG_PATH} present at ${plugin.source.repo}@${ref}`,
+          });
+          return;
+        }
+        if (result === "missing") {
+          findings.push({
+            rule: "ADR-0009",
+            status: "FAIL",
+            context: ctx,
+            message:
+              `${AIDA_CONFIG_PATH} not found at ${plugin.source.repo}@${ref} (HTTP 404). ` +
+              "Listed plugins must ship an AIDA scaffolding manifest.",
+          });
+          return;
+        }
+        // result === "error"
+        findings.push({
+          rule: "ADR-0009",
+          status: "FAIL",
+          context: ctx,
+          message:
+            `could not verify ${AIDA_CONFIG_PATH} at ${plugin.source.repo}@${ref} ` +
+            "(network or auth error). CI should not silently pass an unverified plugin.",
+        });
+      });
+
+      return findings;
+    },
+  };
+}
+
+/** Default rule instance wired to the real `gh api` checker. */
+export const adr0009: Rule = makeAdr0009Rule(ghCliChecker);
+
 // --- Registry ---
 
-export const RULES: readonly Rule[] = [adr0003, adr0005, adr0006, adr0007] as const;
+export const RULES: readonly Rule[] = [adr0003, adr0005, adr0006, adr0007, adr0009] as const;
 
 // --- Schema validation (ADR-0008) ---
 
