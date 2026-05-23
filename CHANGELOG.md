@@ -12,6 +12,12 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0011: decline local commit hooks (`pre-commit`, `lefthook`,
+  `husky`) in favor of `make lint` + fast CI. Records the
+  deferral with named re-open triggers (contributor volume,
+  CI latency, repeated fixup commits, or a scaffolded marketplace
+  adopting hooks first). Documentation-driven; no validator rule
+  to enforce. Closes #78.
 - CI: `Validate CODEOWNERS` step in the `Lint` job. Calls
   `gh api repos/${{ github.repository }}/codeowners/errors` and
   fails the job if the returned `errors[]` array is non-empty.

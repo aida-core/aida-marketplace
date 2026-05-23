@@ -41,3 +41,4 @@ See [`0000-adr-template.md`](./0000-adr-template.md). Copy it, rename, fill in.
 | 0008 | [JSON Schema as the canonical structural definition](./0008-json-schemas.md) | Accepted | [#50](https://github.com/aida-core/aida-marketplace/issues/50) |
 | 0009 | [Listed plugins must ship `.claude-plugin/aida-config.json`](./0009-aida-config-required.md) | Accepted | [#44](https://github.com/aida-core/aida-marketplace/issues/44) |
 | 0010 | [Branch protection baseline](./0010-branch-protection-baseline.md) | Accepted | [#49](https://github.com/aida-core/aida-marketplace/issues/49) |
+| 0011 | [Decline local commit hooks](./0011-local-commit-hooks.md) | Accepted | [#78](https://github.com/aida-core/aida-marketplace/issues/78) |
