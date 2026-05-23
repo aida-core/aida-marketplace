@@ -6,9 +6,24 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { adr0003, adr0005, adr0006, adr0007, isValidGitHubSlug } from "./validate-marketplace.js";
+import {
+  adr0003,
+  adr0005,
+  adr0006,
+  adr0007,
+  isValidGitHubSlug,
+  validateSchema,
+} from "./validate-marketplace.js";
 import type { Marketplace, Plugin } from "./marketplace-types.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SCHEMA: unknown = JSON.parse(
+  readFileSync(resolve(__dirname, "..", "schemas", "marketplace.schema.json"), "utf-8"),
+);
 
 function baseMarketplace(): Marketplace {
   return {
@@ -364,5 +379,115 @@ describe("ADR-0007 rule (category allow-list)", () => {
     m.plugins.push(basePlugin({ category: "bogus" }));
     const fails = adr0007.check(m).filter((f) => f.status === "FAIL");
     assert.match(fails[0].message, /ADR amendment/);
+  });
+});
+
+describe("Schema validation (ADR-0008)", () => {
+  function validManifest(): Record<string, unknown> {
+    return {
+      name: "test",
+      version: "0.1.0",
+      description: "A test marketplace.",
+      owner: { name: "aida-core" },
+      plugins: [
+        {
+          name: "example",
+          kind: "plugin",
+          source: { source: "github", repo: "aida-core/example-plugin", ref: "v1.0.0" },
+          description: "An example.",
+          version: "1.0.0",
+          category: "core",
+          author: { name: "aida-core" },
+          tags: ["example"],
+        },
+      ],
+    };
+  }
+
+  it("accepts a clean manifest", () => {
+    const result = validateSchema(validManifest(), SCHEMA);
+    assert.equal(result.valid, true);
+    assert.equal(result.errors.length, 0);
+  });
+
+  it("accepts a manifest with optional $schema field", () => {
+    const m = validManifest();
+    m.$schema = "https://example.com/schema.json";
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, true);
+  });
+
+  it("rejects manifest missing required `owner`", () => {
+    const m = validManifest();
+    delete m.owner;
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects manifest missing required `plugins`", () => {
+    const m = validManifest();
+    delete m.plugins;
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects owner with forbidden `email` property", () => {
+    const m = validManifest();
+    (m.owner as Record<string, unknown>).email = "ops@example.com";
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.some((e) => /additionalProp/i.test(e.message ?? "") || /email/.test(JSON.stringify(e.params))));
+  });
+
+  it("rejects owner.name that isn't a valid GitHub slug", () => {
+    const m = validManifest();
+    (m.owner as Record<string, unknown>).name = "foo bar"; // space invalid
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects plugin with invalid `kind` enum value", () => {
+    const m = validManifest();
+    ((m.plugins as Array<Record<string, unknown>>)[0]).kind = "playbook";
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects plugin with category not in the allow-list", () => {
+    const m = validManifest();
+    ((m.plugins as Array<Record<string, unknown>>)[0]).category = "dev-workflow";
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects plugin with source.ref that isn't semver", () => {
+    const m = validManifest();
+    const source = ((m.plugins as Array<Record<string, unknown>>)[0]).source as Record<string, unknown>;
+    source.ref = "main";
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects plugin missing required `kind`", () => {
+    const m = validManifest();
+    delete ((m.plugins as Array<Record<string, unknown>>)[0]).kind;
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("rejects wrong type on version (number instead of string)", () => {
+    const m = validManifest();
+    m.version = 1 as unknown as string;
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+  });
+
+  it("error paths point to the failing field", () => {
+    const m = validManifest();
+    ((m.plugins as Array<Record<string, unknown>>)[0]).category = "bogus";
+    const result = validateSchema(m, SCHEMA);
+    assert.equal(result.valid, false);
+    const categoryErr = result.errors.find((e) => /category/.test(e.instancePath ?? ""));
+    assert.ok(categoryErr, "expected an error with instancePath containing /category");
   });
 });

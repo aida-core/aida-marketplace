@@ -20,6 +20,8 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import Ajv, { type ErrorObject } from "ajv";
+
 import type { Marketplace, Plugin } from "./marketplace-types.js";
 
 // --- Types ---
@@ -336,6 +338,39 @@ export const adr0007: Rule = {
 
 export const RULES: readonly Rule[] = [adr0003, adr0005, adr0006, adr0007] as const;
 
+// --- Schema validation (ADR-0008) ---
+
+interface SchemaResult {
+  valid: boolean;
+  errors: ErrorObject[];
+}
+
+function loadSchema(scriptDir: string): unknown {
+  const root = resolve(scriptDir, "..");
+  const schemaPath = resolve(root, "schemas", "marketplace.schema.json");
+  return JSON.parse(readFileSync(schemaPath, "utf-8"));
+}
+
+export function validateSchema(marketplace: unknown, schema: unknown): SchemaResult {
+  // `strict: false` because we use `description` fields for documentation that
+  // strict mode would warn on.
+  // The `as unknown as new ...` cast handles ajv's default-export interop quirk
+  // under Node16/ESM, where TS sees the namespace rather than the class itself.
+  const AjvCtor = Ajv as unknown as new (opts?: object) => {
+    compile: (schema: object) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
+  };
+  const ajv = new AjvCtor({ allErrors: true, strict: false });
+  const validate = ajv.compile(schema as object);
+  const ok = validate(marketplace);
+  return { valid: !!ok, errors: validate.errors ?? [] };
+}
+
+function formatSchemaError(err: ErrorObject): string {
+  const path = err.instancePath || "(root)";
+  const detail = err.params ? ` ${JSON.stringify(err.params)}` : "";
+  return `[schema] ✗ ${path}: ${err.message ?? "(no message)"}${detail}`;
+}
+
 // --- Reporter ---
 
 function formatFinding(f: Finding): string {
@@ -405,6 +440,27 @@ function main(): void {
     console.error(`[ERROR] ${manifestPath} is not valid JSON: ${(err as Error).message}`);
     process.exit(2);
   }
+
+  // Structural validation first (ADR-0008). If the manifest doesn't conform
+  // to the schema, semantic rules can't run safely — report and exit.
+  let schema: unknown;
+  try {
+    schema = loadSchema(__dirname);
+  } catch (err) {
+    console.error(`[ERROR] could not load marketplace schema: ${(err as Error).message}`);
+    process.exit(2);
+  }
+  const schemaResult = validateSchema(marketplace, schema);
+  if (!schemaResult.valid) {
+    console.error("Schema validation FAILED (per ADR-0008):");
+    for (const err of schemaResult.errors) {
+      console.error("  " + formatSchemaError(err));
+    }
+    console.error("");
+    console.error("Fix structural issues before semantic rules can run.");
+    process.exit(1);
+  }
+  console.log("[schema] ✓ marketplace.json conforms to schemas/marketplace.schema.json");
 
   const findings = runRules(marketplace);
   const failures = report(findings);

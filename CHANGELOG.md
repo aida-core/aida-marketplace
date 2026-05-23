@@ -12,6 +12,26 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0008: JSON Schema is the canonical structural definition of
+  `marketplace.json`. Filed from #50. Establishes a two-layer model
+  — schema for structural enforcement (types, required fields,
+  enums, patterns), validator for cross-field semantics and
+  ADR-traceable failure messages.
+- `schemas/marketplace.schema.json` — JSON Schema draft-07 for the
+  manifest. Mirrors the value-level constraints from ADRs 0003,
+  0005, 0006, 0007.
+- `$schema` field in `.claude-plugin/marketplace.json` pointing
+  at the canonical schema URL. IDEs pick this up automatically
+  for autocomplete and inline structural validation.
+- Schema validation runs in the existing validator before the
+  semantic rules. Structural failures exit before semantic rules
+  run; their error paths point at the failing field
+  (e.g., `/plugins/0/category`).
+- `ajv` (v8) as a devDependency for schema validation.
+- 12 new unit tests covering the schema layer.
+- Documentation noting that the companion frontmatter schema
+  lives at `aida-core/aida-core-plugin/.frontmatter-schema.json`
+  and is referenced (not vendored) to avoid drift.
 - ADR-0007: closed allow-list for plugin categories
   (`core`, `workflow`, `infrastructure`, `language`, `integration`,
   `domain`, `productivity`, `security`, `observability`). Adding a
