@@ -12,6 +12,28 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0010: branch protection baseline. Profile-conditional
+  (Simple vs Enterprise per ADR-0002) with full security control
+  set on both — `required_signatures` (signed commits),
+  `required_conversation_resolution`, explicit
+  `allow_force_pushes: false` / `allow_deletions: false`,
+  `required_status_checks.strict: true`, and tag protection for
+  `v*` (per ADR-0006's pinning semantics). Simple profile
+  (this repo) keeps `require_code_owner_reviews: false` and
+  `enforce_admins: false` because CODEOWNERS has a single entry
+  today; named trigger to re-enable code-owner-review once
+  CODEOWNERS has two or more entries. Enterprise sets
+  `enforce_admins: true` (no admin bypass) and linear history.
+  Filed from #49.
+- `docs/runbooks/branch-protection.md` — operational runbook with
+  literal `gh api` snippets per profile. Includes prerequisites
+  (signed commits set up), PUT-is-REPLACE semantics warning,
+  status-check job-name mapping, repo-level control notes
+  (Dependabot/secret scanning), and common scenarios (sole
+  maintainer admin bypass, Renovate auto-merge, re-enabling
+  code-owner-review when team grows).
+- `MAINTAINERS.md` — Owner role section now cross-references
+  ADR-0010 and the runbook.
 - `.github/workflows/link-check.yml` — markdown link validation
   via lychee. Two jobs: a PR-scoped check (only the changed `.md`
   files, scoped via `tj-actions/changed-files`) that hard-fails
