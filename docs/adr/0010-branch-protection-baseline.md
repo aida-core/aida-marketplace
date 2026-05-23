@@ -73,7 +73,8 @@ These apply to `main` regardless of profile:
 Required status check contexts (workflow job names that GitHub gates on):
 
 - `TypeScript` (typecheck + tests + validator + version check)
-- `Lint` (yaml + md + json + REUSE + frontmatter)
+- `Lint` (yaml + md + json + REUSE + frontmatter + CODEOWNERS)
+- `Audit` (`npm audit --audit-level=high`; per [ADR-0012](./0012-supply-chain-audit-policy.md))
 - `No AI Co-Authors`
 - `Changelog`
 - `PR scope (changed markdown only)` (link-check on PRs)
