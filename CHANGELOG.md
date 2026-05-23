@@ -12,6 +12,14 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `renovate.json` adopting the Simple profile per ADR-0002. Extends
+  the org-level Renovate config at
+  [`aida-core/.github`](https://github.com/aida-core/.github/blob/main/default.json)
+  (which provides the marketplace.json regex manager, labeling
+  rules, and dashboard-approval gating). Adds the Simple-profile
+  override: auto-merge minor/patch updates from `aida-core/*`
+  sources behind required CI checks. Majors and external sources
+  go through dashboard approval per the inherited org rules.
 - `docs/adr/` directory adopting ADR-driven governance for the
   marketplace (umbrella #42). Five Phase 1 ADRs accepted from the
   /discuss issues filed in May:
