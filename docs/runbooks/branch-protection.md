@@ -40,6 +40,7 @@ The strings in `required_status_checks.contexts` must match the workflow
 | --- | --- |
 | `TypeScript` | `.github/workflows/ci.yml` (typecheck job) |
 | `Lint` | `.github/workflows/ci.yml` (lint job) |
+| `Audit` | `.github/workflows/ci.yml` (audit job — per ADR-0012) |
 | `Changelog` | `.github/workflows/ci.yml` (changelog job) |
 | `No AI Co-Authors` | `.github/workflows/no-ai-coauthor.yml` |
 | `PR scope (changed markdown only)` | `.github/workflows/link-check.yml` (pr-scope job) |
@@ -66,6 +67,7 @@ gh api -X PUT repos/aida-core/aida-marketplace/branches/main/protection \
     "contexts": [
       "TypeScript",
       "Lint",
+      "Audit",
       "No AI Co-Authors",
       "Changelog",
       "PR scope (changed markdown only)"
@@ -113,6 +115,7 @@ gh api -X PUT repos/<OWNER>/<REPO>/branches/main/protection \
     "contexts": [
       "TypeScript",
       "Lint",
+      "Audit",
       "No AI Co-Authors",
       "Changelog",
       "PR scope (changed markdown only)"

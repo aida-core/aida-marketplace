@@ -44,6 +44,25 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run check
 
+  audit:
+    name: Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      # --ignore-scripts: don't run install hooks during a security check.
+      - run: npm ci --ignore-scripts
+
+      # `npm audit` against the committed lockfile. Blocks on high or
+      # critical advisories. Renovate's CVE auto-merge clears the gate
+      # automatically when it lands a fix. See ADR-0012 for the policy.
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high --omit=optional
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

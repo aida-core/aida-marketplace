@@ -12,6 +12,16 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0012: supply-chain audit policy. Adds a blocking `Audit`
+  CI job running `npm audit --audit-level=high --omit=optional`
+  on every PR and push to `main`. Pairs with the existing
+  CVE-handling stack (Renovate auto-merge for patch+minor,
+  Dependabot alerts) — fills the PR-time blocking gap. Allowlist
+  mechanism deferred (YAGNI; npm `overrides` is the preferred
+  remediation; Renovate's CVE PRs typically clear the gate
+  automatically). Closes #76.
+- `Audit` added to ADR-0010's required-status-check baseline and
+  to the branch-protection runbook's `gh api` snippet.
 - ADR-0011: decline local commit hooks (`pre-commit`, `lefthook`,
   `husky`) in favor of `make lint` + fast CI. Records the
   deferral with named re-open triggers (contributor volume,
