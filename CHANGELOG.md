@@ -12,6 +12,21 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `scripts/validate-frontmatter.py` — validates YAML frontmatter
+  on markdown files against the AIDA frontmatter schema. The
+  schema is fetched from its canonical upstream location at
+  `aida-core/aida-core-plugin/.frontmatter-schema.json` per
+  ADR-0008 (reference, not vendor). Local development against a
+  sibling clone can set `$AIDA_FRONTMATTER_SCHEMA` to a file
+  path or pass `--schema=<path>`. Filed from #54.
+- Files without YAML frontmatter are skipped (logged, not
+  failed). This lets the validator land before this repo's own
+  markdown migrates to the frontmatter convention. A future PR
+  can flip the script to require frontmatter on every file.
+- `jsonschema>=4.20` and `PyYAML>=6.0` added to
+  `requirements-dev.txt` for the script.
+- `make validate-frontmatter` target. Runs in CI as part of the
+  lint job.
 - ADR-0008: JSON Schema is the canonical structural definition of
   `marketplace.json`. Filed from #50. Establishes a two-layer model
   — schema for structural enforcement (types, required fields,

@@ -4,7 +4,7 @@
 # AIDA Marketplace Makefile
 # Run `make help` for available targets
 
-.PHONY: help install lint lint-yaml lint-md lint-json lint-reuse typecheck check validate test
+.PHONY: help install lint lint-yaml lint-md lint-json lint-reuse typecheck check validate validate-frontmatter test
 
 help: ## Show this help message
 	@echo "AIDA Marketplace - Available targets:"
@@ -41,6 +41,9 @@ check: ## Run plugin version check
 
 validate: ## Run marketplace.json rule validation (per ADR-0001)
 	npm run validate
+
+validate-frontmatter: ## Validate YAML frontmatter on markdown files
+	python3 scripts/validate-frontmatter.py
 
 test: ## Run unit tests
 	npm test
