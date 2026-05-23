@@ -6,10 +6,11 @@
   ],
   "packageRules": [
     {
-      "description": "Auto-merge minor/patch updates from trusted aida-core/* sources. Required CI checks (validator + tests) gate the merge.",
+      "description": "Auto-merge minor/patch updates from trusted aida-core/* sources. We own these plugins, so they bypass the org-wide 14-day minimumReleaseAge gate (release review happens at the plugin repos themselves). Required CI checks here still gate the merge.",
       "matchDatasources": ["github-releases"],
       "matchDepNames": ["/^aida-core\\//"],
       "matchUpdateTypes": ["minor", "patch"],
+      "minimumReleaseAge": "0 days",
       "automerge": true,
       "automergeType": "pr"
     }

@@ -36,3 +36,4 @@ See [`0000-adr-template.md`](./0000-adr-template.md). Copy it, rename, fill in.
 | 0003 | [Marketplace entry kinds — plugin and guidebook](./0003-marketplace-entry-kinds.md) | Accepted | [#55](https://github.com/aida-core/aida-marketplace/issues/55) |
 | 0004 | [GitHub App for cross-repo operations](./0004-github-app.md) | Accepted | [#58](https://github.com/aida-core/aida-marketplace/issues/58) |
 | 0005 | [Author and owner identity](./0005-author-and-owner-identity.md) | Accepted | [#59](https://github.com/aida-core/aida-marketplace/issues/59) |
+| 0006 | [Plugin source refs must be semver tags](./0006-semver-tag-refs.md) | Accepted | [#43](https://github.com/aida-core/aida-marketplace/issues/43) |
