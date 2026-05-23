@@ -6,41 +6,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// --- Types ---
+import type { Marketplace, Plugin } from "./marketplace-types.js";
 
-interface PluginAuthor {
-  name: string;
-  email: string;
-}
-
-interface PluginSource {
-  source: string;
-  repo: string;
-  ref: string;
-}
-
-interface Plugin {
-  name: string;
-  source: PluginSource;
-  description: string;
-  version: string;
-  category: string;
-  homepage?: string;
-  author?: PluginAuthor;
-  tags: string[];
-}
-
-interface Marketplace {
-  name: string;
-  version: string;
-  description: string;
-  owner: {
-    name: string;
-    email: string;
-    url: string;
-  };
-  plugins: Plugin[];
-}
+// --- Script-local types ---
 
 interface CheckResult {
   plugin: string;

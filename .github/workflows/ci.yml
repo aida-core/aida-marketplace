@@ -26,7 +26,13 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      - name: Validate plugins
+      - name: Run unit tests
+        run: npm test
+
+      - name: Validate marketplace.json (per ADR-0001)
+        run: npm run validate
+
+      - name: Plugin version check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run check
