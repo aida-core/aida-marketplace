@@ -1,0 +1,47 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits"
+  ],
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track plugin source.ref values in .claude-plugin/marketplace.json as github-releases",
+      "managerFilePatterns": ["^\\.claude-plugin/marketplace\\.json$"],
+      "matchStrings": [
+        "\"repo\":\\s*\"(?<depName>[^\"]+)\"[^}]*?\"ref\":\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Label trusted internal plugin sources. Replace <YOUR_ORG> with your org name; add additional trusted orgs as needed.",
+      "matchDepNames": ["/^<YOUR_ORG>\\//", "/^aida-core\\//"],
+      "addLabels": ["trusted-source"]
+    },
+    {
+      "description": "Gate external (non-trusted) plugin sources on dashboard approval",
+      "matchDatasources": ["github-releases"],
+      "matchDepNames": ["!/^<YOUR_ORG>\\//", "!/^aida-core\\//"],
+      "addLabels": ["external-source"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Major version bumps always require manual review",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major-version"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Auto-merge disabled by default. Enterprise operators enable per-rule (e.g., trusted-source + minor/patch) once Renovate operations have been validated against the operator's CI and review policies.",
+      "matchDatasources": ["github-releases"],
+      "automerge": false
+    }
+  ]
+}
