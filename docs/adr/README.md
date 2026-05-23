@@ -43,3 +43,4 @@ See [`0000-adr-template.md`](./0000-adr-template.md). Copy it, rename, fill in.
 | 0010 | [Branch protection baseline](./0010-branch-protection-baseline.md) | Accepted | [#49](https://github.com/aida-core/aida-marketplace/issues/49) |
 | 0011 | [Decline local commit hooks](./0011-local-commit-hooks.md) | Accepted | [#78](https://github.com/aida-core/aida-marketplace/issues/78) |
 | 0012 | [Supply-chain audit policy](./0012-supply-chain-audit-policy.md) | Accepted | [#76](https://github.com/aida-core/aida-marketplace/issues/76) |
+| 0013 | [Marketplace release model](./0013-marketplace-release-model.md) | Accepted | [#77](https://github.com/aida-core/aida-marketplace/issues/77) |

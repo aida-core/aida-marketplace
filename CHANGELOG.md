@@ -12,6 +12,32 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- ADR-0013: marketplace release model. Manual semver tag at
+  maintainer discretion, asserting `marketplace.json#version`
+  matches the tag. Bump policy: patch = plugin patch/minor only;
+  minor = new plugin or consumer-visible ADR; major = breaking
+  schema change or plugin removal. Closes #77.
+- `.github/workflows/release.yml` — tag-triggered release
+  workflow (`push: tags: ['v*.*.*']`). Re-runs validator + plugin
+  version check + `npm audit`, asserts manifest version matches
+  the tag, generates 3 artifacts and creates a GitHub Release.
+- Release artifacts attached on every `v*` release:
+  - `marketplace.json` — verbatim manifest snapshot
+  - `plugin-pins.json` — derived `{name, repo, ref, version}[]`
+    for the audit lane (diffable between releases)
+  - `sbom.cdx.json` — CycloneDX 1.6 SBOM of the marketplace's
+    own dependency tree (the validator's supply chain). Generated
+    via `@cyclonedx/cyclonedx-npm` (npx, no devDep addition).
+- `scripts/extract-changelog.ts` — line-based parser that pulls
+  a CHANGELOG section by version string. Used by `release.yml`
+  to populate the GitHub Release body. 5 unit tests covering
+  Unreleased, versioned, final-in-file, missing-section, and
+  regex-metachar-escaping cases.
+- `docs/runbooks/release.md` — operational runbook with the
+  pre-release checklist, tag-and-push sequence, what the workflow
+  does, and the common-scenario answers (version-mismatch fix,
+  Renovate races, hotfix flow, SBOM transient failures, why we
+  don't use workflow_dispatch).
 - `repository_dispatch` trigger on `.github/workflows/check-updates.yml`
   for event type `plugin-released`. Lets plugin repos optionally send
   an instant-bump signal that bypasses Renovate's Monday cadence by

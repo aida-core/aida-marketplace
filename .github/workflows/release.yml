@@ -1,0 +1,118 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+---
+name: Release
+
+# Tag-triggered. The maintainer pushes a signed v* tag (per the runbook)
+# and this workflow takes over: re-runs CI gates, generates artifacts,
+# publishes a GitHub Release. See ADR-0013 for the release model.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      # Required to create the GitHub Release and upload assets.
+      contents: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0 # extract-changelog needs the full history
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      - run: npm ci --ignore-scripts
+
+      # --- Gates: re-run CI before publishing the release ---
+
+      - name: Re-run validator (ADR-0001)
+        run: npm run validate
+
+      - name: Re-run plugin version check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run check
+
+      - name: Re-run npm audit (ADR-0012)
+        run: npm audit --audit-level=high --omit=optional
+
+      # --- Assert marketplace.json#version matches the tag (ADR-0013) ---
+
+      - name: Assert manifest version matches tag
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          tag_version="${tag#v}"
+          manifest_version=$(node -e \
+            "process.stdout.write(require('./.claude-plugin/marketplace.json').version)")
+          if [ "$tag_version" != "$manifest_version" ]; then
+            echo "::error::tag ${tag} → ${tag_version}, but marketplace.json#version is ${manifest_version}." \
+              "Bump marketplace.json#version in a PR before tagging."
+            exit 1
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "version=${tag_version}" >> "$GITHUB_OUTPUT"
+
+      # --- Generate release artifacts ---
+
+      - name: Generate plugin-pins.json
+        run: |
+          node -e "
+            const m = require('./.claude-plugin/marketplace.json');
+            const pins = m.plugins.map(p => ({
+              name: p.name,
+              repo: p.source.repo,
+              ref: p.source.ref,
+              version: p.version,
+            }));
+            require('fs').writeFileSync('plugin-pins.json',
+              JSON.stringify(pins, null, 2) + '\n');
+          "
+
+      - name: Generate SBOM (CycloneDX 1.6 JSON)
+        # @cyclonedx/cyclonedx-npm reads package-lock.json; produces an SBOM
+        # of the validator's own supply chain (the security-relevant surface
+        # for this metadata-only marketplace). Pinned via `npx` to a specific
+        # version so the release is reproducible.
+        run: |
+          npx --yes @cyclonedx/cyclonedx-npm@^4.0.0 \
+            --spec-version 1.6 \
+            --output-format json \
+            --output-file sbom.cdx.json
+
+      # --- Extract release notes from CHANGELOG ---
+
+      - name: Extract CHANGELOG section
+        run: |
+          npx tsx scripts/extract-changelog.ts "${{ steps.version.outputs.version }}" \
+            > release-notes.md
+          echo "Release notes preview:"
+          head -40 release-notes.md
+
+      # --- Publish ---
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          body_path: release-notes.md
+          fail_on_unmatched_files: true
+          files: |
+            .claude-plugin/marketplace.json
+            plugin-pins.json
+            sbom.cdx.json
