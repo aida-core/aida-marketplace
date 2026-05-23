@@ -187,6 +187,27 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- `Makefile` — `make install` now provisions a local Python
+  virtualenv at `.venv/` (skipping the PEP 668
+  "externally-managed-environment" trap on modern macOS / Python
+  3.12+). Targets resolve `$(PY)`, `$(YAMLLINT)`, and `$(REUSE)`
+  via `$(if $(wildcard $(VENV)/bin/X),...)` with recursive
+  expansion (`=`, not `:=`) so the wildcard re-evaluates each
+  recipe call — `make install lint` in a single invocation
+  picks up the freshly-installed venv binaries for the lint
+  step. Make 3.81-compatible (no `export PATH`).
+  `validate-frontmatter` now invokes `$(PY)` instead of bare
+  `python3`. CI is unchanged: it pip-installs to the Actions
+  Python and the wildcards fall through to PATH binaries.
+- `.gitignore` — adds `.venv/`, `__pycache__/`, `*.pyc`,
+  `*.pyo` so the venv and Python build artifacts are never
+  committed. (REUSE respects gitignore, so `make lint-reuse`
+  continues to pass after `make install`.)
+- New `make clean-venv` target removes `.venv/` for a clean
+  rebuild.
+- Resolves #48. Follow-ups: pin exact versions / add
+  `--require-hashes` to `requirements-dev.txt`; migrate CI to
+  use `make install` for a single source of truth.
 - CI: the `Validate marketplace.json` step now receives
   `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` so ADR-0009 can hit
   the Contents API for each listed plugin.

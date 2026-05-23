@@ -1,6 +1,12 @@
 # Dependencies
 node_modules/
 
+# Python virtualenv (created by `make install` — never committed)
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
 # Build output
 dist/
 
