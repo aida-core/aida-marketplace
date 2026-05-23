@@ -18,6 +18,11 @@ the people who must review.
 - **GitHub access:** admin.
 - **What they can do:** bypass branch protection, modify CI/CD, force-push
   (when temporarily allowed), configure repo settings, cut releases.
+- **Branch protection contract:** see [ADR-0010](docs/adr/0010-branch-protection-baseline.md)
+  for the baseline and [docs/runbooks/branch-protection.md](docs/runbooks/branch-protection.md)
+  for the `gh api` commands to apply / re-apply the policy. Owner admin
+  bypass is the documented escape hatch under the Simple profile while
+  CODEOWNERS has a single entry — recorded in the GitHub audit log.
 
 ### Committer
 
