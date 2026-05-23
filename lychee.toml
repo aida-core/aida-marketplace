@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+# lychee config for markdown link validation. Used by
+# .github/workflows/link-check.yml on PRs and by `make link-check` locally.
+# Reference: https://github.com/lycheeverse/lychee/blob/master/docs/usage/configuration.md
+
+# --- Networking ---
+
+max_retries = 3
+retry_wait_time = 5  # seconds; lychee applies exponential backoff on top
+timeout = 20
+max_concurrency = 8
+
+# Cache between runs. lychee-action handles persistence in CI.
+cache = true
+max_cache_age = "1d"
+
+# --- What to accept ---
+
+# 200 and 206 (Partial Content) only. 429 (rate-limited) is NOT accepted here:
+# masking it would let a real rate-limit issue silently coexist with the
+# `max_retries`/`retry_wait_time` settings we just tuned, defeating the
+# adaptation. If 429s start showing up, the right fix is concurrency tuning,
+# not adding 429 to this list.
+accept = [200, 206]
+
+# Validate `#anchor` links within local markdown (md-to-md cross-refs).
+# Note: github.com URLs with fragments are excluded below because GitHub
+# renders anchors client-side and lychee can't reliably validate them.
+include_fragments = true
+
+# --- What to skip ---
+
+exclude_path = [
+  "node_modules",
+  "LICENSES",
+  ".git",
+  ".lycheecache",
+]
+
+# URL patterns to skip:
+exclude = [
+  # The marketplace's `$schema` field in .claude-plugin/marketplace.json points
+  # at the raw URL on main, which won't resolve on a PR that introduces or
+  # modifies the schema. Skip the self-reference; the validator + JSON tooling
+  # catch schema-shape problems directly.
+  '^https://raw\.githubusercontent\.com/aida-core/aida-marketplace/main/schemas/',
+
+  # GitHub renders fragments client-side; lychee fragment validation flakes on
+  # them. Skip github.com URLs that carry an anchor. The URL itself is still
+  # validated only via the bare URL (lychee strips the # before fetching).
+  '^https://github\.com/.*#',
+
+  # GitHub API URL templates referenced in ADR text and docstrings, e.g.
+  # https://api.github.com/users/{slug}. These contain a `{`/`}` placeholder
+  # which is never a real URL.
+  '^https://api\.github\.com/(users|orgs|repos)/\{',
+
+  # Placeholder example hosts used in code/doc examples.
+  '^https?://(www\.)?example\.(com|org)',
+]

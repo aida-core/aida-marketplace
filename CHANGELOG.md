@@ -12,6 +12,26 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `.github/workflows/link-check.yml` — markdown link validation
+  via lychee. Two jobs: a PR-scoped check (only the changed `.md`
+  files, scoped via `tj-actions/changed-files`) that hard-fails
+  on broken links; and a weekly full-repo scan (Mondays 09:00 UTC,
+  with manual dispatch) that runs against `**/*.md`. The scheduled
+  job soft-fails and opens a tracked issue (`bug` +
+  `documentation` labels) via `peter-evans/create-issue-from-file`
+  so broken links don't vanish into Actions history. All actions
+  SHA-pinned per Phase 3 hardening direction (#20). Filed from #52.
+- `lychee.toml` at the repo root — lychee configuration. Networking
+  tuned for github.com (max 8 concurrent, 3 retries, 20s timeout).
+  Anchor validation enabled for local markdown cross-refs;
+  github.com fragments excluded because GitHub renders them
+  client-side and lychee can't reliably validate them. The
+  marketplace's `$schema` self-reference and GitHub API URL
+  templates in ADR text are also excluded. `429` is deliberately
+  NOT in the `accept` list — masking it would mask a real concurrency
+  tuning problem.
+- `make link-check` — local-runnable lychee invocation. Errors
+  out cleanly with an install hint if lychee isn't on PATH.
 - `.github/workflows/labeler.yml` and `.github/labeler.yml` —
   auto-label PRs by changed paths using `actions/labeler@v5`
   (SHA-pinned). Categories: `plugin-change` (marketplace.json),

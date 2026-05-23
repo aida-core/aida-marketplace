@@ -4,7 +4,7 @@
 # AIDA Marketplace Makefile
 # Run `make help` for available targets
 
-.PHONY: help install lint lint-yaml lint-md lint-json lint-reuse typecheck check validate validate-frontmatter test
+.PHONY: help install lint lint-yaml lint-md lint-json lint-reuse typecheck check validate validate-frontmatter link-check test
 
 help: ## Show this help message
 	@echo "AIDA Marketplace - Available targets:"
@@ -44,6 +44,10 @@ validate: ## Run marketplace.json rule validation (per ADR-0001)
 
 validate-frontmatter: ## Validate YAML frontmatter on markdown files
 	python3 scripts/validate-frontmatter.py
+
+link-check: ## Validate markdown links via lychee (install: brew install lychee, or cargo install lychee)
+	@command -v lychee >/dev/null 2>&1 || { echo "ERROR: lychee not installed. brew install lychee  OR  cargo install lychee"; exit 1; }
+	lychee --config lychee.toml '**/*.md'
 
 test: ## Run unit tests
 	npm test
