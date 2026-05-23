@@ -38,10 +38,11 @@ primary path.
 
 In each plugin repo that opts in, add `.github/workflows/notify-marketplace.yml`:
 
-```yaml
-# SPDX-FileCopyrightText: 2026 <plugin author>
-# SPDX-License-Identifier: <plugin license>
+Add an SPDX header matching the plugin repo's existing convention
+(usually `# SPDX-FileCopyrightText: ...` + `# SPDX-License-Identifier: ...`
+above the YAML document marker), then:
 
+```yaml
 ---
 name: Notify aida-marketplace of release
 
