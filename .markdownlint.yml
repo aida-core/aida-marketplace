@@ -16,3 +16,11 @@ MD033:
 # Allow duplicate headings in different sections
 MD024:
   siblings_only: true
+
+# Files in this repo combine YAML frontmatter (with a `title:` field for
+# AIDA's frontmatter validator) and a body H1 (for human readers + GitHub
+# rendering). MD025's default treats both as top-level titles. Disable
+# frontmatter-title detection so the body H1 is the only H1 markdownlint
+# counts.
+MD025:
+  front_matter_title: ""
