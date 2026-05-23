@@ -8,6 +8,12 @@ on:
   push:
     branches: [main]
   pull_request:
+    # Include `labeled` / `unlabeled` so label-aware step conditions
+    # (e.g. the changelog job's `skip-changelog` opt-out) re-evaluate
+    # when a label is added to an already-open PR. Without these, the
+    # workflow keeps the event payload from the original trigger and
+    # ignores subsequent label changes.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     branches: [main]
 
 # Least-privilege default for the workflow. Every job here only reads the
@@ -24,7 +30,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "20"
+          node-version: "22"
 
       - run: npm ci
 
@@ -52,7 +58,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "20"
+          node-version: "22"
 
       # --ignore-scripts: don't run install hooks during a security check.
       - run: npm ci --ignore-scripts
@@ -71,7 +77,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
