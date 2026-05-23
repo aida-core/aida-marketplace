@@ -12,6 +12,26 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Added
 
+- `scripts/validate-marketplace.ts` — the marketplace validator
+  (per ADR-0001). Pluggable rule framework that emits per-finding
+  `OK` / `FAIL` records with the originating ADR number in the
+  message. Wired into CI as a blocking gate.
+- `scripts/marketplace-types.ts` — shared TypeScript types for the
+  manifest, imported by both `update-marketplace.ts` and
+  `validate-marketplace.ts` so the two stay in sync.
+- `scripts/validate-marketplace.test.ts` — unit tests for the
+  validator and its rules. Uses Node's built-in `node:test` so no
+  new test-framework dependency is required.
+- Two enforced rules in the validator:
+  - `[ADR-0003]` — every `plugins[]` entry has `kind` (`plugin`
+    or `guidebook`) and its `source.repo` ends in the matching
+    suffix.
+  - `[ADR-0005]` — `owner.name` and every `plugins[].author.name`
+    is a valid GitHub slug; `email` is forbidden on both;
+    `owner.url` is forbidden.
+- `make validate` / `make test` targets and `npm run validate` /
+  `npm test` scripts that exercise the validator and the test
+  suite respectively.
 - `renovate.json` adopting the Simple profile per ADR-0002. Extends
   the org-level Renovate config at
   [`aida-core/.github`](https://github.com/aida-core/.github/blob/main/default.json)
