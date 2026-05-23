@@ -1,0 +1,22 @@
+version = 1
+SPDX-PackageName = "aida-marketplace"
+SPDX-PackageSupplier = "oakensoul <github@oakensoul.com>"
+SPDX-PackageDownloadLocation = "https://github.com/aida-core/aida-marketplace"
+SPDX-PackageComment = "Copyright is held by 'The AIDA Marketplace Authors'; the roster lives in the AUTHORS file at the repo root. This file licenses paths that cannot carry inline SPDX headers (no comment syntax) or that should not carry one. Files that can carry inline headers should — see scripts/add_spdx_headers.py."
+
+# JSON has no comment syntax, so it cannot carry an inline SPDX header.
+[[annotations]]
+path = "**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The AIDA Marketplace Authors"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Top-level config files and AUTHORS roster — AUTHORS' contents
+# already provide attribution (it lists the contributors), so
+# inline SPDX would be redundant. .markdownlintignore is a single-line
+# ignore file; an inline header would dwarf the content.
+[[annotations]]
+path = ["AUTHORS", ".gitignore", "**/.gitignore", "**/.gitkeep", ".markdownlintignore"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The AIDA Marketplace Authors"
+SPDX-License-Identifier = "MPL-2.0"

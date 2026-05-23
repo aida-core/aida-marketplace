@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Changelog
 
 All notable changes to the AIDA marketplace are documented in this file.
@@ -7,8 +10,36 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ## [Unreleased]
 
+### Added
+
+- `AUTHORS` file at the repo root listing substantive contributors.
+  The collective copyright holder used in SPDX file headers is
+  "The AIDA Marketplace Authors"; the AUTHORS roster is the
+  authoritative list of who that collective is. Lets file headers
+  stay stable as the contributor list grows — new substantive
+  contributors are appended on first merged PR.
+- SPDX `SPDX-FileCopyrightText` / `SPDX-License-Identifier` headers
+  on every hand-authored source file (Markdown, YAML, TOML,
+  CODEOWNERS, TypeScript, Makefile, requirements). Inserted via the
+  new `scripts/add_spdx_headers.py` — idempotent, dry-run by
+  default, reads `git ls-files` and skips fixtures, JSON, lockfiles,
+  and `LICENSE` itself per the org skip list.
+- `REUSE.toml` at the repo root licensing the skip categories
+  (JSON files, `AUTHORS`, `.gitignore`, `.markdownlintignore`,
+  `.gitkeep`). Repo is REUSE 3.3 compliant.
+- `LICENSES/MPL-2.0.txt` (REUSE-required canonical license text).
+  `LICENSE` at root is unchanged so GitHub still displays it.
+- `Makefile` exposing `lint-yaml`, `lint-md`, `lint-json`,
+  `lint-reuse`, and an aggregate `lint` target. Mirrors the
+  pattern used in `aida-core/aida-core-plugin`.
+- `requirements-dev.txt` pinning `yamllint>=1.35` and
+  `reuse>=4.0` for local + CI use.
+
 ### Changed
 
+- CI `lint` job now runs `make lint-yaml` / `make lint-md` /
+  `make lint-json` / `make lint-reuse`. `reuse lint` is now a
+  blocking gate for SPDX/REUSE compliance.
 - `check-updates.yml` workflow now prunes prior `automated/plugin-updates-*`
   branches before opening a new update PR, so closed/superseded automation
   branches no longer accumulate on origin.

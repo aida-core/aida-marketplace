@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
 ---
 name: CI
 
@@ -45,19 +48,22 @@ jobs:
 
       - name: Install linters
         run: |
-          pip install yamllint
+          pip install -r requirements-dev.txt
           npm install -g markdownlint-cli2
 
       - name: Lint YAML
-        run: yamllint .github/workflows/ .yamllint.yml .markdownlint.yml
+        run: make lint-yaml
 
       - name: Lint Markdown
-        run: markdownlint-cli2 '**/*.md'
+        run: make lint-md
 
       - name: Validate JSON
         run: |
-          python -m json.tool .claude-plugin/marketplace.json > /dev/null
+          make lint-json
           echo "marketplace.json is valid JSON"
+
+      - name: Lint REUSE / SPDX
+        run: make lint-reuse
 
   changelog:
     name: Changelog

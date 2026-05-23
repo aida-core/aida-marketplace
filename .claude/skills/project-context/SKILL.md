@@ -11,6 +11,9 @@ tags:
   - configuration
 ---
 
+<!-- SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 # Project Context: aida-marketplace
 
 This skill provides factual information about aida-marketplace's

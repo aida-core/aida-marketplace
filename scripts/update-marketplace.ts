@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+// SPDX-License-Identifier: MPL-2.0
+
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";

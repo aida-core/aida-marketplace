@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 The AIDA Marketplace Authors
+# SPDX-License-Identifier: MPL-2.0
+
+# AIDA Marketplace Development Dependencies
+#
+# Install with: make install (or pip install -r requirements-dev.txt)
+
+# Linting
+yamllint>=1.35
+reuse>=4.0
