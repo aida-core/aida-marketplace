@@ -36,7 +36,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       # tj-actions/changed-files is SHA-pinned. Handles first-push and
       # force-push correctly (where a hand-rolled `git diff BASE_REF` would
@@ -70,7 +70,7 @@ jobs:
       # Required for the issue-creation step. Job-scoped, not top-level.
       issues: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Run lychee
         id: lychee

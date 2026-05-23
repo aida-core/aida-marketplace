@@ -9,9 +9,11 @@ on:
     - cron: "0 8 * * 1" # Monday 8am UTC
   workflow_dispatch:
 
+# Workflow-level default is read-only. The single job below escalates to
+# write because it opens an automation PR — keeping the escalation
+# job-scoped is defense in depth against future jobs inheriting write.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: plugin-updates
@@ -20,10 +22,13 @@ concurrency:
 jobs:
   check-updates:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "20"
 

@@ -209,6 +209,42 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- All CI workflows now declare top-level
+  `permissions: contents: read` as a least-privilege baseline.
+  Jobs that need broader scope (`check-updates.yml` opens PRs,
+  `link-check.yml` schedules issue creation, `labeler.yml`
+  writes labels) escalate at the job level instead of the
+  workflow level — defense in depth against future jobs
+  inheriting write scope they don't need. Filed from #20.
+- All third-party GitHub Actions across every workflow are now
+  SHA-pinned with a trailing `# vX.Y.Z` comment for human
+  readability. Previously `ci.yml`, `no-ai-coauthor.yml`, and
+  `check-updates.yml` referenced `actions/checkout@v4`,
+  `actions/setup-node@v4`, `actions/setup-python@v5` by tag;
+  now they reference the specific commit SHAs that those tags
+  resolved to. Matches the pattern already used in
+  `labeler.yml` and `link-check.yml`. Filed from #20.
+- `.gitignore` — secret patterns block expanded substantially.
+  In addition to the existing `.env`/`.env.*`, now ignores:
+  `*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.crt`, `*.jks`,
+  `*.keystore`, `id_rsa*`, `id_ed25519*`, `id_ecdsa*`, `id_dsa*`,
+  `credentials*`, `secrets.y*ml`, `*.gpg`, `*.asc`, `.netrc`,
+  `.npmrc`, `.pypirc`, `kubeconfig`, `*.kubeconfig`, `.kube/config`,
+  `.aws/credentials`, `.aws/config`, `*.tfstate*`, `.terraform/`.
+  Defense-in-depth against accidental key/credential commits.
+  Filed from #20.
+- `docs/runbooks/branch-protection.md` — repository-level
+  controls section now includes literal `gh api` commands for
+  enabling Dependabot vulnerability **alerts** (notifications,
+  no PRs — complement Renovate) and explicitly documents that
+  Dependabot **security updates** are deliberately DISABLED
+  because Renovate already owns the CVE-PR lane (per
+  ADR-0002). A separate block covers secret scanning + push
+  protection setup. Filed from #20.
+- Dependabot vulnerability alerts ENABLED on this repo (one-time
+  `gh api PUT vulnerability-alerts`). Notifications only;
+  Renovate continues to own update PRs. Dependabot security
+  updates remain disabled to avoid duplicate CVE PRs.
 - `Makefile` — `make install` now provisions a local Python
   virtualenv at `.venv/` (skipping the PEP 668
   "externally-managed-environment" trap on modern macOS / Python

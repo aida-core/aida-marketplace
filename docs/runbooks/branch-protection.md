@@ -166,15 +166,77 @@ gh api repos/aida-core/aida-marketplace/tags/protection \
 ## Repository-level controls (out of scope for branch protection)
 
 These complement branch protection but live at the repo level (not on the
-branch endpoint). Confirm via the GitHub UI under **Settings → Security**:
+branch endpoint). They're not part of the branch-protection JSON payload
+but ARE part of the recommended baseline. Apply via the snippets below or
+under **Settings → Security** in the GitHub UI.
 
-- Dependabot alerts: **enabled** (we use Renovate for updates; alerts
-  still surface CVEs)
-- Secret scanning: **enabled**
-- Push protection for secrets: **enabled**
+### Dependabot vulnerability alerts (alerts only — NOT update PRs)
 
-These cannot be cleanly set via the branch-protection runbook; treat them
-as a separate one-time setup.
+Renovate owns ALL update PRs per [ADR-0002](../adr/0002-marketplace-profiles.md),
+including CVE patches (auto-merged at patch+minor for trusted sources).
+Dependabot **alerts** are a *different* feature: GitHub-hosted CVE
+notifications backed by the GHSA database that surface vulnerabilities
+without opening PRs. Enabling alerts alongside Renovate is
+non-conflicting because alerts don't open PRs.
+
+```bash
+# Enable Dependabot vulnerability alerts (notifications only)
+gh api -X PUT repos/aida-core/aida-marketplace/vulnerability-alerts
+```
+
+### Dependabot security updates — DELIBERATELY OFF
+
+Dependabot's "security updates" feature opens PRs for known-vulnerable
+versions. Renovate already does this for us (per ADR-0002, with the
+`vulnerabilityAlerts` block in the org-level config). Enabling Dependabot
+security updates alongside Renovate would create **duplicate PRs** for
+every CVE. We disable it deliberately:
+
+```bash
+# Disable Dependabot security update PRs (Renovate owns this lane)
+gh api -X DELETE repos/aida-core/aida-marketplace/automated-security-fixes
+```
+
+Verify:
+
+```bash
+gh api repos/aida-core/aida-marketplace \
+  --jq '.security_and_analysis.dependabot_security_updates.status'
+# Expected: "disabled"
+```
+
+**Enterprise profile note:** if a downstream marketplace doesn't use
+Renovate for some reason (Mend hosting policy, etc.), Dependabot security
+updates ARE the right substitute. Enable in that case via:
+
+```bash
+gh api -X PUT repos/<OWNER>/<REPO>/automated-security-fixes
+```
+
+### Secret scanning + push protection
+
+If/when the repo is upgraded to a plan that supports it (currently
+included on public repos and on GitHub Enterprise Cloud):
+
+```bash
+gh api -X PATCH repos/aida-core/aida-marketplace \
+  -H "Accept: application/vnd.github+json" \
+  --input - <<'JSON'
+{
+  "security_and_analysis": {
+    "secret_scanning": { "status": "enabled" },
+    "secret_scanning_push_protection": { "status": "enabled" }
+  }
+}
+JSON
+```
+
+Verify all three via:
+
+```bash
+gh api repos/aida-core/aida-marketplace \
+  --jq '.security_and_analysis'
+```
 
 ## Rulesets vs classic (forward-looking)
 
