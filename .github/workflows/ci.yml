@@ -71,6 +71,9 @@ jobs:
       - name: Lint REUSE / SPDX
         run: make lint-reuse
 
+      - name: Validate markdown frontmatter
+        run: make validate-frontmatter
+
   changelog:
     name: Changelog
     if: github.event_name == 'pull_request'
