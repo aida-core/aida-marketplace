@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: "0 8 * * 1" # Monday 8am UTC
   workflow_dispatch:
+  # Plugin repos can dispatch this event to trigger an immediate update
+  # check rather than waiting for the Monday cron. See
+  # docs/runbooks/instant-bump.md for the plugin-side workflow snippet
+  # and the auth token requirement.
+  repository_dispatch:
+    types: [plugin-released]
 
 # Workflow-level default is read-only. The single job below escalates to
 # write because it opens an automation PR — keeping the escalation
