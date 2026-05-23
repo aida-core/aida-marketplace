@@ -211,8 +211,7 @@ of scope for this runbook).
 Use the admin bypass above. If you find yourself doing this routinely,
 the policy is misaligned with your workflow — open an ADR-amendment PR.
 
-### "I want to re-enable `require_code_owner_reviews` because we now
-have 2 code owners"
+### "I want to re-enable `require_code_owner_reviews` (we have 2+ code owners now)"
 
 Update `.github/CODEOWNERS` first. Then flip the field in the Simple
 payload above and re-run. Document the change in CHANGELOG and reference
