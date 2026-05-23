@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/aida-core/aida-marketplace/main/schemas/marketplace.schema.json",
   "name": "aida",
   "version": "0.2.0",
   "description": "AIDA - Agentic Intelligence Digital Assistant. Foundation plugins for extending Claude Code.",

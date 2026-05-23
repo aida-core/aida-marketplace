@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/aida-core/aida-marketplace/blob/main/schemas/marketplace.schema.json",
+  "title": "AIDA Marketplace Manifest",
+  "description": "Structural schema for `.claude-plugin/marketplace.json`. Mirrors the constraints enforced by the TypeScript validator (see scripts/validate-marketplace.ts). When semantic constraints (e.g., kind <-> repo suffix matching) require cross-field reasoning that JSON Schema can't easily express, those checks live in the validator, not here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "version", "description", "owner", "plugins"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional pointer to this schema for IDE integration."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Marketplace identifier."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Marketplace version (semver X.Y.Z, no v prefix)."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$",
+          "description": "GitHub slug (org or user) that owns the marketplace. Per ADR-0005; email and url are forbidden."
+        }
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Plugin" }
+    }
+  },
+  "definitions": {
+    "Plugin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "kind",
+        "source",
+        "description",
+        "version",
+        "category",
+        "author",
+        "tags"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["plugin", "guidebook"],
+          "description": "Marketplace entry kind. Per ADR-0003; source.repo suffix must match (cross-field rule enforced by the validator)."
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "repo", "ref"],
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Source provider (e.g., \"github\")."
+            },
+            "repo": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$",
+              "description": "owner/repo form."
+            },
+            "ref": {
+              "type": "string",
+              "pattern": "^v?\\d+\\.\\d+\\.\\d+$",
+              "description": "Semver tag (optional v prefix). Per ADR-0006; branches, SHAs, pre-release tags, and build-metadata tags are forbidden."
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Plugin semver (no v prefix)."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "core",
+            "workflow",
+            "infrastructure",
+            "language",
+            "integration",
+            "domain",
+            "productivity",
+            "security",
+            "observability"
+          ],
+          "description": "Per ADR-0007; adding a category requires an ADR amendment + validator update."
+        },
+        "homepage": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional. URI to the plugin's homepage."
+        },
+        "author": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$",
+              "description": "GitHub slug (org or user). Per ADR-0005; email is forbidden."
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
