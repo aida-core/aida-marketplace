@@ -166,7 +166,7 @@ export function formatMarkdown(report: MaturityReport): string {
     lines.push("");
   }
 
-  return lines.join("\n");
+  return lines.join("\n").trimEnd() + "\n";
 }
 
 function capitalize(s: string): string {
@@ -206,7 +206,9 @@ function main(argv: string[]): number {
   }
 
   const out = format === "markdown" ? formatMarkdown(report) : formatJson(report);
-  process.stdout.write(out + "\n");
+  // formatMarkdown returns content with a single trailing newline. Avoid
+  // appending a second.
+  process.stdout.write(format === "markdown" ? out : out + "\n");
 
   if (failUnderRaw) {
     const failUnder = Number(failUnderRaw);

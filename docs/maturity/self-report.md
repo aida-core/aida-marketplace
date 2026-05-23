@@ -1,7 +1,7 @@
 # Plugin Maturity Report
 
 - **Path:** `/Users/dx-aida-core/Developer/aida-core/aida-marketplace`
-- **Scanned:** 2026-05-23T21:01:01.901Z
+- **Scanned:** 2026-05-23T21:04:15.945Z
 
 ## Overall: Level 3 — Hardened (80%)
 
@@ -12,7 +12,7 @@ Counts: 3 present, 0 partial, 3 missing, 0 n/a
 | | Check | Evidence |
 | --- | --- | --- |
 | ✓ | LICENSE file at the repo root | found LICENSE |
-| ✗ | SECURITY.md | no SECURITY.md (org-level fallback at <org>/.github/SECURITY.md is not detected here) |
+| ✗ | SECURITY.md | no SECURITY.md (org-level fallback at `<org>/.github/SECURITY.md` is not detected here) |
 | ✗ | CONTRIBUTING.md | no CONTRIBUTING.md |
 | ✗ | CODE_OF_CONDUCT.md | no CODE_OF_CONDUCT.md |
 | ✓ | CHANGELOG.md (Keep a Changelog format) | found CHANGELOG.md with Keep a Changelog reference |
@@ -56,4 +56,3 @@ Counts: 6 present, 0 partial, 0 missing, 0 n/a
 | ✓ | Type-check configuration | found tsconfig.json |
 | ✓ | Test files exist | 3 test file(s) found |
 | ✓ | README has a usage section (fenced code block) | README contains at least one fenced code block |
-

@@ -119,7 +119,7 @@ export function checkSecurityMd(ctx: CheckContext): CheckResult {
     status: name ? "present" : "missing",
     evidence: name
       ? `found ${name}`
-      : "no SECURITY.md (org-level fallback at <org>/.github/SECURITY.md is not detected here)",
+      : "no SECURITY.md (org-level fallback at `<org>/.github/SECURITY.md` is not detected here)",
   };
 }
 
