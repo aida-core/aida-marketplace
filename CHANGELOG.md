@@ -430,6 +430,18 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
   branches before opening a new update PR, so closed/superseded automation
   branches no longer accumulate on origin.
 
+### Security
+
+- Bumped `tsx` `4.21.1` → `4.22.4` (lockfile only; within the existing
+  `^4.7.0` range) to pull in `esbuild` `0.28.1`, clearing two high-severity
+  advisories in the transitive `esbuild` dependency: GHSA-gv7w-rqvm-qjhr
+  (missing binary integrity verification in the Deno module → RCE via
+  `NPM_CONFIG_REGISTRY`) and GHSA-g7r4-m6w7-qqqr (dev-server arbitrary file
+  read on Windows). Neither vector is reachable from this repo's usage (`tsx`
+  only transpiles local TS scripts; no Deno module, no esbuild dev server,
+  Linux CI), but ADR-0012 blocks high+ findings regardless. Unblocks the
+  Audit gate so the aida-core pin bump can land.
+
 ## [0.2.0] - 2026-04-28
 
 Governance, policy, and a new aida-core pin. Adds branch-protection
