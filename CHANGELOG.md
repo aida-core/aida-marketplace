@@ -335,6 +335,13 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- `.claude-plugin/marketplace.json` — bumped the `aida-core` plugin
+  pin from `v1.4.6` to `v1.5.35` (`source.ref` + per-plugin
+  `version`). Picks up the slash-command-shadowing fix
+  (aida-core-plugin#158): every AIDA sub-skill is now scoped behind
+  the single `/aida` entry point, so the `permissions` skill no
+  longer shadows Claude Code's built-in `/permissions` command. Also
+  rolls up all aida-core changes from 1.4.7 through 1.5.35.
 - Bumped Node from 20 to **22 LTS** across CI workflows (ci.yml,
   check-updates.yml, release.yml), `package.json#engines`
   (`>=22.0.0`), and `@types/node` (`^22.0.0`). Node 20 hits EOL

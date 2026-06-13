@@ -13,10 +13,10 @@
       "source": {
         "source": "github",
         "repo": "aida-core/aida-core-plugin",
-        "ref": "v1.4.6"
+        "ref": "v1.5.35"
       },
       "description": "Foundation plugin for building your custom Claude Code experience. Extension scaffolding, multi-level configuration, and structured session context.",
-      "version": "1.4.6",
+      "version": "1.5.35",
       "category": "core",
       "homepage": "https://github.com/aida-core/aida-core-plugin",
       "author": {
