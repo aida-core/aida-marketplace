@@ -335,6 +335,13 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 
 ### Changed
 
+- `.claude-plugin/marketplace.json` — bumped the `aida-core` plugin
+  pin from `v1.4.6` to `v1.5.35` (`source.ref` + per-plugin
+  `version`). Picks up the slash-command-shadowing fix
+  (aida-core-plugin#158): every AIDA sub-skill is now scoped behind
+  the single `/aida` entry point, so the `permissions` skill no
+  longer shadows Claude Code's built-in `/permissions` command. Also
+  rolls up all aida-core changes from 1.4.7 through 1.5.35.
 - Bumped Node from 20 to **22 LTS** across CI workflows (ci.yml,
   check-updates.yml, release.yml), `package.json#engines`
   (`>=22.0.0`), and `@types/node` (`^22.0.0`). Node 20 hits EOL
@@ -422,6 +429,18 @@ and the marketplace adheres to [Semantic Versioning](https://semver.org/spec/v2.
 - `check-updates.yml` workflow now prunes prior `automated/plugin-updates-*`
   branches before opening a new update PR, so closed/superseded automation
   branches no longer accumulate on origin.
+
+### Security
+
+- Bumped `tsx` `4.21.1` → `4.22.4` (lockfile only; within the existing
+  `^4.7.0` range) to pull in `esbuild` `0.28.1`, clearing two high-severity
+  advisories in the transitive `esbuild` dependency: GHSA-gv7w-rqvm-qjhr
+  (missing binary integrity verification in the Deno module → RCE via
+  `NPM_CONFIG_REGISTRY`) and GHSA-g7r4-m6w7-qqqr (dev-server arbitrary file
+  read on Windows). Neither vector is reachable from this repo's usage (`tsx`
+  only transpiles local TS scripts; no Deno module, no esbuild dev server,
+  Linux CI), but ADR-0012 blocks high+ findings regardless. Unblocks the
+  Audit gate so the aida-core pin bump can land.
 
 ## [0.2.0] - 2026-04-28
 
